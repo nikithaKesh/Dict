@@ -12,17 +12,11 @@
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .word-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .word-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
-        
-        /* Spinner Loader */
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Progress Bar */
-        .progress-fill { transition: width 0.5s ease-in-out; }
-
-        #word-preview-modal { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-fill { transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
+        #word-preview-modal { transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #word-preview-modal.active { transform: translateY(0); }
-        
         .difficulty-hard { color: #ef4444; }
         .difficulty-medium { color: #f59e0b; }
         .difficulty-easy { color: #10b981; }
@@ -30,125 +24,129 @@
 </head>
 <body class="min-h-screen pb-20">
 
-    <div id="login-screen" class="fixed inset-0 z-[200] bg-indigo-600 flex items-center justify-center p-6">
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-indigo-700 flex items-center justify-center p-6">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center">
-            <h2 class="text-3xl font-bold mb-2">WordVault</h2>
-            <p class="text-slate-500 mb-8">Enter your name to begin</p>
-            <input id="login-input" type="text" placeholder="Nikitha..." class="w-full p-4 rounded-2xl border mb-4 outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold">
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all">Enter Vault</button>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">Vault Login</h2>
+            <p class="text-slate-500 mb-8">Enter your name to unlock your vault</p>
+            <input id="login-input" type="text" placeholder="Nikitha..." class="w-full p-4 rounded-2xl border mb-4 outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold text-lg">
+            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Enter Vault</button>
         </div>
     </div>
 
-    <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col">
-        <nav class="p-6 flex items-center justify-between bg-white border-b">
-            <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600 hover:bg-indigo-100 transition-all">
+    <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col overflow-hidden">
+        <nav class="p-6 flex items-center justify-between bg-white/80 backdrop-blur-md border-b sticky top-0 z-10">
+            <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600 hover:bg-indigo-600 hover:text-white transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <span class="font-bold text-slate-400 uppercase text-xs">Learning Insight</span>
+            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Full Vocabulary Insight</span>
             <div class="w-12"></div>
         </nav>
-        <div class="flex-1 overflow-y-auto p-8 md:p-20">
-            <div class="max-w-4xl mx-auto text-center">
-                <div id="pv-diff" class="text-xs font-black uppercase tracking-widest mb-2">HARD</div>
-                <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
-                <p id="pv-date" class="text-slate-400 font-medium mb-12"></p>
+        <div class="flex-1 overflow-y-auto p-6 md:p-16 bg-white">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <div id="pv-diff" class="text-[10px] font-black uppercase tracking-widest mb-2">HARD</div>
+                    <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
+                    <p id="pv-date" class="text-slate-400 font-medium italic mb-6"></p>
+                    <button onclick="speakWord(document.getElementById('pv-word').innerText)" class="bg-indigo-50 text-indigo-600 px-8 py-3 rounded-full font-bold text-sm hover:bg-indigo-100 transition-all">Listen Pronunciation</button>
+                </div>
                 
-                <div id="pv-meanings-list" class="space-y-8 text-left max-w-2xl mx-auto">
+                <div id="pv-meanings-container" class="space-y-10">
                     </div>
-
-                <button onclick="speakWordInPreview()" class="mt-12 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black flex items-center gap-3 mx-auto">
-                    Listen Pronunciation
-                </button>
             </div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
         <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white border-t lg:border-t-0 lg:border-r z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-8 p-4">
-            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            </div>
-            <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
-            <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
-            <button onclick="handleLogout()" class="lg:mt-auto text-slate-300 hover:text-red-500 p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg shadow-indigo-100 font-bold">W</div>
+            <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+            <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
+            <button onclick="handleLogout()" class="lg:mt-auto text-slate-300 hover:text-red-500 transition-colors p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
         </aside>
 
         <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
             <header class="mb-12">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
-                        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Your Dashboard</h1>
-                        <p class="text-slate-500 mt-1 italic">Hello, <span id="user-display" class="font-bold text-indigo-600">Nikitha</span></p>
+                        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Vocabulary OS</h1>
+                        <p class="text-slate-500 mt-1 italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600">Learner</span></p>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px]">
-                            <span class="text-[10px] uppercase font-black text-slate-400">Total Words</span>
-                            <h4 id="stat-total" class="text-2xl font-bold">0</h4>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
+                            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Total Words</span>
+                            <h4 id="stat-total" class="text-2xl font-black">0</h4>
                         </div>
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px]">
-                            <span class="text-[10px] uppercase font-black text-slate-400">Past 7 Days</span>
-                            <h4 id="stat-weekly" class="text-2xl font-bold">0</h4>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
+                            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Past 7 Days</span>
+                            <h4 id="stat-weekly" class="text-2xl font-black text-indigo-600">0</h4>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-bold text-slate-700">Daily Goal: <span id="daily-count-text">0</span> / 5 Words</span>
+                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black text-slate-700 uppercase tracking-widest">Daily Focus: <span id="daily-count-text" class="text-indigo-600">0</span>/5 Words</span>
                         <span id="goal-percent" class="text-xs font-black text-indigo-600">0%</span>
                     </div>
-                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div id="goal-progress-bar" class="progress-fill bg-indigo-600 h-full w-0"></div>
                     </div>
                 </div>
             </header>
 
             <div class="relative group max-w-3xl mx-auto mb-16">
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-25 transition duration-1000"></div>
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-1000"></div>
                 <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
                     <input id="word-input" type="text" placeholder="Explore a new word..." class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
                     <div id="search-loader" class="loader mr-4"></div>
-                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all">Search</button>
+                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Search</button>
                 </div>
             </div>
 
             <section id="search-result" class="hidden max-w-3xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-500">
-                <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-6">
+                <div class="glass p-8 md:p-12 rounded-[3rem] shadow-2xl relative">
+                    <div class="flex justify-between items-start mb-10">
                         <div>
-                            <div id="result-diff-tag" class="text-[10px] font-black uppercase mb-1">MEDIUM</div>
+                            <div id="result-diff-tag" class="text-[10px] font-black uppercase mb-1 tracking-widest">MEDIUM</div>
                             <h2 id="result-word" class="text-6xl font-black text-slate-900 capitalize tracking-tighter">Word</h2>
-                            <p id="result-phonetic" class="text-indigo-500 font-semibold tracking-wide">/phonetic/</p>
+                            <p id="result-phonetic" class="text-indigo-500 font-bold tracking-wide">/phonetic/</p>
                         </div>
-                        <button onclick="playResultAudio()" class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-all">
+                        <button onclick="playResultAudio()" class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                         </button>
                     </div>
 
-                    <div id="meanings-stack" class="space-y-6 mb-10">
+                    <div id="meanings-stack" class="space-y-8 mb-10">
                         </div>
 
-                    <div id="thesaurus-box" class="hidden mb-10 p-4 bg-slate-50 rounded-2xl">
-                        <p class="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Thesaurus</p>
-                        <div id="synonyms-list" class="flex flex-wrap gap-2 text-sm text-indigo-600 font-bold"></div>
+                    <div id="thesaurus-box" class="hidden mb-12 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Synonyms</p>
+                                <div id="synonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-indigo-600"></div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Antonyms</p>
+                                <div id="antonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-red-500"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all">Learn this word</button>
+                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all">Mark as Learned</button>
                 </div>
             </section>
 
             <section>
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <h3 class="text-2xl font-black text-slate-900">Vocabulary Library</h3>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Vocabulary Library</h3>
                     <div class="flex flex-1 max-w-md gap-2">
-                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search my words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500">
-                        <select id="sort-filter" onchange="renderLibrary()" class="bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none cursor-pointer">
+                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search saved words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500">
+                        <select id="sort-filter" onchange="renderLibrary()" class="bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none cursor-pointer font-bold text-slate-500">
                             <option value="newest">Latest</option>
                             <option value="az">A-Z</option>
                         </select>
                     </div>
                 </div>
-
                 <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
         </main>
@@ -160,10 +158,10 @@
         let currentWordData = null;
         let currentUser = null;
 
-        // --- AUTH ---
+        // --- AUTH & SETUP ---
         function handleLogin() {
             const name = document.getElementById('login-input').value.trim();
-            if(!name) return;
+            if(!name) return alert("Please enter your name");
             currentUser = name;
             localStorage.setItem('word_vault_user', name);
             initApp();
@@ -182,7 +180,7 @@
             renderLibrary();
         }
 
-        // --- SEARCH & DIFFICULTY ---
+        // --- SEARCH CORE ---
         async function searchWord() {
             const word = document.getElementById('word-input').value.trim();
             if(!word) return;
@@ -194,65 +192,65 @@
                 if(data.title) throw "Not Found";
                 currentWordData = data[0];
                 updateSearchUI(currentWordData);
-            } catch(e) { alert("Word not found! Try another."); }
+            } catch(e) { alert("Word not found. Try another spelling."); }
             finally { toggleLoader(false); }
         }
 
-        function calculateDifficulty(word) {
-            if(word.length < 6) return 'Easy';
-            if(word.length < 9) return 'Medium';
-            return 'Hard';
-        }
-
         function updateSearchUI(data) {
-            const resultArea = document.getElementById('search-result');
-            resultArea.classList.remove('hidden');
-            
+            document.getElementById('search-result').classList.remove('hidden');
             document.getElementById('result-word').innerText = data.word;
             document.getElementById('result-phonetic').innerText = data.phonetic || '';
             
-            const diff = calculateDifficulty(data.word);
+            const diff = (data.word.length < 6) ? 'Easy' : (data.word.length < 9) ? 'Medium' : 'Hard';
             const diffTag = document.getElementById('result-diff-tag');
             diffTag.innerText = diff;
-            diffTag.className = `text-[10px] font-black uppercase mb-1 difficulty-${diff.toLowerCase()}`;
+            diffTag.className = `text-[10px] font-black uppercase mb-1 tracking-widest difficulty-${diff.toLowerCase()}`;
 
-            // Multiple Meanings & Contextual Usage
+            // Contextual Meanings & Examples
             const stack = document.getElementById('meanings-stack');
-            stack.innerHTML = data.meanings.slice(0, 3).map((m, idx) => `
+            stack.innerHTML = data.meanings.slice(0, 3).map(m => `
                 <div class="border-l-4 border-slate-100 pl-4">
-                    <span class="text-[10px] font-black uppercase text-indigo-400">${m.partOfSpeech}</span>
-                    <p class="text-lg text-slate-700 font-medium mb-1">${m.definitions[0].definition}</p>
-                    ${m.definitions[0].example ? `<p class="text-sm text-slate-400 italic">"${m.definitions[0].example}"</p>` : ''}
+                    <span class="text-[9px] font-black uppercase text-indigo-400 tracking-widest">${m.partOfSpeech}</span>
+                    <p class="text-lg text-slate-700 font-bold mb-1 leading-tight">${m.definitions[0].definition}</p>
+                    ${m.definitions[0].example ? `<p class="text-sm text-slate-400 italic font-medium leading-relaxed">"${m.definitions[0].example}"</p>` : ''}
                 </div>
             `).join('');
 
-            // Synonyms
+            // Thesaurus Logic
             const synBox = document.getElementById('thesaurus-box');
             const synList = document.getElementById('synonyms-list');
-            const allSyns = data.meanings.flatMap(m => m.synonyms).slice(0, 8);
-            if(allSyns.length > 0) {
+            const antList = document.getElementById('antonyms-list');
+            
+            const allSyns = [...new Set(data.meanings.flatMap(m => m.synonyms))].slice(0, 10);
+            const allAnts = [...new Set(data.meanings.flatMap(m => m.antonyms))].slice(0, 10);
+
+            if(allSyns.length || allAnts.length) {
                 synBox.classList.remove('hidden');
                 synList.innerHTML = allSyns.map(s => `<span>#${s}</span>`).join(' ');
+                antList.innerHTML = allAnts.map(a => `<span>#${a}</span>`).join(' ');
             } else { synBox.classList.add('hidden'); }
 
             const saveBtn = document.getElementById('save-word-btn');
             const exists = db.some(w => w.word.toLowerCase() === data.word.toLowerCase());
             saveBtn.disabled = exists;
-            saveBtn.innerText = exists ? "Learned ✅" : "Add to Library";
-            saveBtn.onclick = () => saveWord();
+            saveBtn.innerText = exists ? "Already Learned ✅" : "Mark as Learned";
+            saveBtn.onclick = () => saveWordDeep();
         }
 
-        // --- STORAGE & STATS ---
-        function saveWord() {
+        // --- DATA PERSISTENCE ---
+        function saveWordDeep() {
             const wordObj = {
                 word: currentWordData.word,
-                difficulty: calculateDifficulty(currentWordData.word),
+                phonetic: currentWordData.phonetic || '',
+                difficulty: (currentWordData.word.length < 6) ? 'Easy' : (currentWordData.word.length < 9) ? 'Medium' : 'Hard',
                 date: new Date().getTime(),
-                // Store array of meanings for better preview
-                meanings: currentWordData.meanings.slice(0, 3).map(m => ({
+                // Deep save meanings, examples, synonyms, antonyms
+                deepData: currentWordData.meanings.map(m => ({
                     pos: m.partOfSpeech,
                     def: m.definitions[0].definition,
-                    example: m.definitions[0].example || ''
+                    example: m.definitions[0].example || '',
+                    syns: m.synonyms || [],
+                    ants: m.antonyms || []
                 }))
             };
             db.unshift(wordObj);
@@ -262,6 +260,7 @@
             document.getElementById('word-input').value = "";
         }
 
+        // --- LIBRARY & PREVIEW ---
         function renderLibrary() {
             const grid = document.getElementById('library-grid');
             const query = document.getElementById('lib-search').value.toLowerCase();
@@ -273,33 +272,37 @@
 
             grid.innerHTML = filtered.map(w => `
                 <div onclick="openPreview(${w.date})" class="word-card bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative group">
-                    <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
-                    <span class="text-[9px] font-black uppercase mb-3 block difficulty-${w.difficulty.toLowerCase()}">${w.difficulty}</span>
-                    <h4 class="text-2xl font-bold text-slate-900 capitalize mb-1 group-hover:text-indigo-600 transition-all">${w.word}</h4>
-                    <p class="text-xs text-slate-400 font-medium">Click to study deep definitions</p>
+                    <span class="text-[9px] font-black uppercase mb-3 block difficulty-${w.difficulty.toLowerCase()} tracking-widest">${w.difficulty}</span>
+                    <h4 class="text-2xl font-black text-slate-900 capitalize mb-1 group-hover:text-indigo-600 transition-colors">${w.word}</h4>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Click for deep review</p>
                 </div>
             `).join('');
             updateDashboard();
         }
 
-        // --- PREVIEW ---
         function openPreview(ts) {
             const data = db.find(w => w.date === ts);
             document.getElementById('pv-word').innerText = data.word;
-            document.getElementById('pv-date').innerText = `Added on ${new Date(data.date).toLocaleDateString()}`;
+            document.getElementById('pv-date').innerText = `Unlocked on ${new Date(data.date).toLocaleDateString()}`;
             
             const diffTag = document.getElementById('pv-diff');
             diffTag.innerText = data.difficulty;
-            diffTag.className = `text-xs font-black uppercase tracking-widest mb-2 difficulty-${data.difficulty.toLowerCase()}`;
+            diffTag.className = `text-[10px] font-black uppercase tracking-widest mb-2 difficulty-${data.difficulty.toLowerCase()}`;
 
-            const list = document.getElementById('pv-meanings-list');
-            list.innerHTML = data.meanings.map(m => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <span class="text-[10px] font-black uppercase text-indigo-500 block mb-2 tracking-widest">${m.pos}</span>
-                    <p class="text-xl text-slate-700 leading-relaxed font-semibold mb-4 underline decoration-indigo-100 underline-offset-8">${m.def}</p>
-                    ${m.example ? `<div class="bg-indigo-50 p-4 rounded-2xl text-slate-500 text-sm italic font-medium">"${m.example}"</div>` : ''}
+            const container = document.getElementById('pv-meanings-container');
+            container.innerHTML = data.deepData.map(d => `
+                <div class="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <span class="text-[10px] font-black uppercase text-indigo-500 tracking-widest block mb-4">${d.pos}</span>
+                    <p class="text-2xl font-bold text-slate-800 leading-tight mb-4">${d.def}</p>
+                    ${d.example ? `<div class="bg-white p-4 rounded-2xl border-l-4 border-indigo-400 text-sm text-slate-500 italic mb-6">" ${d.example} "</div>` : ''}
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        ${d.syns.length ? `<div><p class="text-[9px] font-black uppercase text-slate-300 mb-2">Synonyms</p><div class="flex flex-wrap gap-1 text-[10px] font-bold text-indigo-400">${d.syns.slice(0,5).map(s => `<span>#${s}</span>`).join(' ')}</div></div>` : ''}
+                        ${d.ants.length ? `<div><p class="text-[9px] font-black uppercase text-slate-300 mb-2">Antonyms</p><div class="flex flex-wrap gap-1 text-[10px] font-bold text-red-300">${d.ants.slice(0,5).map(a => `<span>#${a}</span>`).join(' ')}</div></div>` : ''}
+                    </div>
                 </div>
             `).join('');
 
@@ -308,53 +311,52 @@
 
         function closePreview() { document.getElementById('word-preview-modal').classList.remove('active'); }
 
-        // --- DASHBOARD ANALYTICS ---
+        // --- DASHBOARD CORE ---
         function updateDashboard() {
             document.getElementById('stat-total').innerText = db.length;
-            
             const now = new Date();
             const startOfDay = new Date().setHours(0,0,0,0);
             const startOfWeekly = new Date().setDate(now.getDate() - 7);
 
-            const learnedToday = db.filter(w => w.date >= startOfDay).length;
-            const learnedWeekly = db.filter(w => w.date >= startOfWeekly).length;
+            const todayCount = db.filter(w => w.date >= startOfDay).length;
+            const weeklyCount = db.filter(w => w.date >= startOfWeekly).length;
 
-            document.getElementById('stat-weekly').innerText = learnedWeekly;
-            document.getElementById('daily-count-text').innerText = learnedToday;
+            document.getElementById('stat-weekly').innerText = weeklyCount;
+            document.getElementById('daily-count-text').innerText = todayCount;
 
-            // Goal Progress
             const goal = 5;
-            const percent = Math.min((learnedToday / goal) * 100, 100);
+            const percent = Math.min((todayCount / goal) * 100, 100);
             document.getElementById('goal-progress-bar').style.width = `${percent}%`;
             document.getElementById('goal-percent').innerText = `${Math.round(percent)}%`;
         }
 
-        // --- UTILS ---
+        // --- HELPERS ---
         function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
-        function speakWordInPreview() { window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('pv-word').innerText)); }
+        function speakWord(text) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
         function playResultAudio() { 
             const link = currentWordData.phonetics.find(p => p.audio)?.audio;
-            link ? new Audio(link).play() : speakWordInPreview();
+            link ? new Audio(link).play() : speakWord(currentWordData.word);
         }
         function deleteWord(ts) { 
-            if(confirm("Delete from library?")) {
+            if(confirm("Permanently delete this word?")) {
                 db = db.filter(w => w.date !== ts);
                 localStorage.setItem(`vault_data_${currentUser.toLowerCase()}`, JSON.stringify(db));
                 renderLibrary();
             }
         }
         function exportToExcel() {
-            const ws = XLSX.utils.json_to_sheet(db.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() })));
+            const exportData = db.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() }));
+            const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Vault");
-            XLSX.writeFile(wb, `${currentUser}_Vocabulary.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "LearnedWords");
+            XLSX.writeFile(wb, `${currentUser}_VocabularyVault.xlsx`);
         }
         function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
         window.onload = () => {
             const saved = localStorage.getItem('word_vault_user');
             if(saved) { currentUser = saved; initApp(); }
-        };
+        }
     </script>
 </body>
 </html>
