@@ -16,18 +16,19 @@
     <style>
         body { font-family: 'Outfit', sans-serif; transition: all 0.3s ease; }
         .dark body { background: #0f172a; color: #f1f5f9; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .dark .glass { background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1); }
         .word-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .word-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .word-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        #word-preview-modal, #profile-modal { transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #word-preview-modal, #profile-modal { transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 150; }
         #word-preview-modal.active, #profile-modal.active { transform: translateY(0); }
 
         .sync-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 
-        .premium-blur { filter: blur(4px); pointer-events: none; user-select: none; }
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="min-h-screen pb-20 bg-slate-50">
@@ -36,12 +37,12 @@
         <div class="bg-white dark:bg-slate-800 p-10 rounded-[3rem] shadow-2xl max-w-sm w-full">
             <div class="text-center mb-8">
                 <h2 id="auth-title" class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">WordVault</h2>
-                <p id="auth-subtitle" class="text-slate-500 text-sm mt-2">Professional Vocabulary Management</p>
+                <p id="auth-subtitle" class="text-slate-500 text-sm mt-2">Professional Vocabulary Cloud</p>
             </div>
             <div class="space-y-4">
                 <input id="auth-email" type="email" placeholder="Email" class="w-full p-4 rounded-2xl border dark:bg-slate-700 dark:border-slate-600 outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
                 <input id="auth-pass" type="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:bg-slate-700 dark:border-slate-600 outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
-                <button onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-800 transition-all shadow-xl active:scale-95">Enter Vault</button>
+                <button onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-800 transition-all shadow-xl">Enter Vault</button>
                 <p class="text-xs text-center text-slate-400">
                     <button onclick="toggleAuthMode()" id="toggle-btn" class="text-indigo-600 font-bold underline">Create Account</button>
                 </p>
@@ -49,64 +50,61 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="fixed inset-0 z-[150] bg-slate-50 dark:bg-slate-900 flex flex-col">
+    <div id="profile-modal" class="fixed inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col">
         <nav class="p-6 flex items-center justify-between border-b dark:border-slate-800 bg-white dark:bg-slate-800">
             <button onclick="closeProfile()" class="p-3 bg-slate-100 dark:bg-slate-700 rounded-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <span class="font-black uppercase text-xs tracking-widest">Account & Insights</span>
+            <span class="font-black uppercase text-xs tracking-widest">My Insights</span>
             <div class="w-12"></div>
         </nav>
         <div class="flex-1 overflow-y-auto p-8 md:p-16">
             <div class="max-w-2xl mx-auto">
                 <div class="flex items-center gap-6 mb-12">
-                    <div id="user-avatar-large" class="w-24 h-24 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center text-4xl font-black shadow-2xl">?</div>
+                    <div id="user-avatar-large" class="w-24 h-24 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center text-4xl font-black shadow-2xl tracking-tighter">?</div>
                     <div>
-                        <h2 id="profile-email" class="text-2xl font-black tracking-tight">email@example.com</h2>
-                        <p id="join-date" class="text-slate-400 text-sm italic">Member since ...</p>
+                        <h2 id="profile-email" class="text-2xl font-black tracking-tight underline decoration-indigo-500 underline-offset-4">...</h2>
+                        <p id="join-date" class="text-slate-400 text-sm italic mt-2">Member Since ...</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-12">
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
-                        <p class="text-[10px] font-black uppercase text-slate-400 mb-1">Learning Streak</p>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">Streak</p>
                         <p class="text-3xl font-black">🔥 <span id="profile-streak">0</span> Days</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
-                        <p class="text-[10px] font-black uppercase text-slate-400 mb-1">Mastery Rate</p>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">Mastery Rate</p>
                         <p class="text-3xl font-black text-emerald-500"><span id="profile-rate">0</span>%</p>
                     </div>
                 </div>
 
-                <div class="relative p-8 rounded-[2.5rem] bg-slate-900 overflow-hidden text-white mb-8">
+                <div class="p-8 rounded-[2.5rem] bg-slate-900 text-white relative overflow-hidden">
                     <div class="relative z-10">
-                        <span class="bg-indigo-500 text-[9px] font-black px-2 py-1 rounded mb-4 inline-block">PRO FEATURE</span>
-                        <h3 class="text-xl font-bold mb-2">Memory Retention Charts</h3>
-                        <p class="text-slate-400 text-sm mb-6">Visualize your forgetting curve and optimize review cycles.</p>
-                        <button class="bg-white text-slate-900 px-6 py-2 rounded-xl font-bold text-sm">Upgrade to Pro</button>
+                        <span class="bg-indigo-600 text-[9px] font-black px-2 py-1 rounded mb-4 inline-block">PRO PREVIEW</span>
+                        <h3 class="text-xl font-bold mb-2">Detailed Learning Velocity</h3>
+                        <p class="text-slate-400 text-sm mb-6">Unlock analytics to see which time of day you learn fastest.</p>
+                        <button class="bg-white/10 border border-white/20 text-white px-6 py-2 rounded-xl font-bold text-sm">Coming Soon</button>
                     </div>
-                    <div class="absolute right-[-20px] bottom-[-20px] text-slate-800 opacity-20 transform rotate-12"><svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="app-content" class="hidden">
-        <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden">
-            <nav class="p-6 flex items-center justify-between border-b dark:border-slate-800 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
-                <button onclick="closePreview()" class="p-3 bg-slate-100 dark:bg-slate-700 rounded-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-                <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[10px] font-black uppercase px-6 py-2 rounded-full shadow-sm transition-all">Mark Mastered</button>
-            </nav>
-            <div class="flex-1 overflow-y-auto p-8 md:p-20 text-center">
-                <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 dark:text-white capitalize mb-4 tracking-tighter">Word</h1>
-                <div id="pv-meanings-container" class="max-w-2xl mx-auto space-y-6 text-left mt-12"></div>
-            </div>
+    <div id="word-preview-modal" class="fixed inset-0 bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden">
+        <nav class="p-6 flex items-center justify-between border-b dark:border-slate-800 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
+            <button onclick="closePreview()" class="p-3 bg-slate-100 dark:bg-slate-700 rounded-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[10px] font-black uppercase px-6 py-2 rounded-full shadow-sm">Mark Mastered</button>
+        </nav>
+        <div class="flex-1 overflow-y-auto p-8 md:p-20 text-center">
+            <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 dark:text-white capitalize mb-4 tracking-tighter">Word</h1>
+            <div id="pv-meanings-container" class="max-w-2xl mx-auto space-y-6 text-left mt-12"></div>
         </div>
+    </div>
 
+    <div id="app-content" class="hidden">
         <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white dark:bg-slate-800 border-t lg:border-t-0 lg:border-r dark:border-slate-700 z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-6 p-4">
-            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg">V</div>
-            <div id="sync-indicator" class="p-1 text-emerald-500 hidden" title="Cloud Synced"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.555 17.776l8-4 .444.894-8 4-.444-.894z"/><path d="M12.395 6.637L10.041 3.51a1 1 0 011.594-1.2l3.414 4.551a1 1 0 01-1.594 1.201l-.117-.156-.943.431z"/><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm0 2a10 10 0 110-20 10 10 0 010 20z"/></svg></div>
-            
-            <button onclick="toggleDarkMode()" class="p-3 text-slate-400 hover:text-yellow-500 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-            <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
+            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg font-black italic">V</div>
+            <div id="sync-indicator" class="p-1 text-emerald-500 hidden" title="Cloud Sync Active"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11H9v3H6v2h3v3h2v-3h3v-2h-3V7z"/></svg></div>
+            <button onclick="toggleDarkMode()" class="p-3 text-slate-400 hover:text-yellow-500 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
             <button onclick="openProfile()" class="p-0 border-2 border-indigo-500 rounded-xl overflow-hidden hover:scale-105 transition-all"><div id="user-avatar-sidebar" class="w-10 h-10 bg-indigo-600 text-white flex items-center justify-center text-xs font-black uppercase">?</div></button>
             <button onclick="handleLogout()" class="lg:mt-auto text-slate-300 hover:text-red-500 p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
         </aside>
@@ -114,29 +112,37 @@
         <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
             <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 class="text-4xl font-black tracking-tight">Cloud Vault Pro</h1>
-                    <p class="text-slate-500 italic mt-1">SaaS Status: <span class="text-emerald-500 font-bold uppercase text-[10px] bg-emerald-50 px-2 py-0.5 rounded">Active Sync</span></p>
+                    <h1 class="text-4xl font-black tracking-tight">Vocabulary Cloud</h1>
+                    <p class="text-slate-500 mt-1 italic italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600">...</span></p>
                 </div>
-                <div class="flex gap-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border dark:border-slate-700 text-center min-w-[120px]">
-                        <span class="text-[10px] uppercase font-black text-slate-400">Total Words</span>
-                        <h4 id="stat-total" class="text-2xl font-black">0</h4>
-                    </div>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border dark:border-slate-700 min-w-[120px] text-center">
+                    <span class="text-[10px] uppercase font-black text-slate-400 block tracking-widest">Cloud Total</span>
+                    <h4 id="stat-total" class="text-2xl font-black">0</h4>
                 </div>
             </header>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border dark:border-slate-700 shadow-sm mb-12">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Today's Focus: <span id="daily-count-text" class="text-indigo-600">0</span>/5</span>
+                    <span id="goal-percent" class="text-xs font-black text-indigo-600">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div id="goal-progress-bar" class="progress-fill bg-indigo-600 h-full w-0"></div>
+                </div>
+            </div>
 
             <div class="relative group max-w-3xl mx-auto mb-16">
                 <div class="relative flex flex-col bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl p-2 border dark:border-slate-700">
                     <div class="flex items-center p-2">
-                        <input id="word-input" type="text" placeholder="Explore a new word... (⌘+K)" class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
-                        <button onclick="searchWord()" class="bg-indigo-600 text-white px-8 py-4 rounded-3xl font-black hover:bg-indigo-700 transition-all active:scale-95">Search</button>
+                        <input id="word-input" type="text" placeholder="Search a word... (⌘+K)" class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
+                        <div id="search-loader" class="loader mr-4"></div>
+                        <button onclick="searchWord()" class="bg-indigo-600 text-white px-8 py-4 rounded-3xl font-black hover:bg-indigo-700 transition-all active:scale-95">Find</button>
                     </div>
-                    <div class="flex items-center gap-2 px-6 pb-4 overflow-x-auto">
-                        <span class="text-[10px] font-black text-slate-400 uppercase shrink-0">Add Tag:</span>
+                    <div class="flex items-center gap-2 px-6 pb-4">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category:</span>
                         <select id="tag-selector" class="bg-slate-50 dark:bg-slate-700 text-[11px] font-bold px-3 py-1 rounded-full outline-none">
                             <option value="General">General</option>
                             <option value="GRE">GRE Prep</option>
-                            <option value="IELTS">IELTS</option>
                             <option value="Tech">Tech / Work</option>
                             <option value="Personal">Personal</option>
                         </select>
@@ -144,10 +150,10 @@
                 </div>
             </div>
 
-            <section id="search-result" class="hidden max-w-3xl mx-auto mb-20">
+            <section id="search-result" class="hidden max-w-3xl mx-auto mb-20 animate-in fade-in duration-500">
                 <div class="glass p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
                     <div id="result-content"></div>
-                    <button onclick="saveToCloud()" id="save-word-btn" class="w-full mt-10 bg-indigo-600 text-white py-5 rounded-3xl font-black text-lg shadow-xl active:scale-95">Save to Cloud Vault</button>
+                    <button onclick="saveToCloud()" id="save-word-btn" class="w-full mt-10 bg-indigo-600 text-white py-5 rounded-3xl font-black text-lg active:scale-95">Save to Cloud Vault</button>
                 </div>
             </section>
 
@@ -158,10 +164,10 @@
                         <select id="lib-filter-tag" onchange="renderLibrary()" class="bg-white dark:bg-slate-800 border dark:border-slate-700 p-3 rounded-xl text-xs font-bold outline-none">
                             <option value="All">All Tags</option>
                             <option value="GRE">GRE Prep</option>
-                            <option value="Tech">Tech / Work</option>
+                            <option value="Tech">Tech</option>
                             <option value="General">General</option>
                         </select>
-                        <input id="lib-search" type="text" placeholder="Search..." class="bg-white dark:bg-slate-800 border dark:border-slate-700 p-3 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500">
+                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search..." class="bg-white dark:bg-slate-800 border dark:border-slate-700 p-3 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500">
                     </div>
                 </div>
                 <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -199,7 +205,6 @@
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.theme = isDark ? 'dark' : 'light';
         };
-
         window.openProfile = () => document.getElementById('profile-modal').classList.add('active');
         window.closeProfile = () => document.getElementById('profile-modal').classList.remove('active');
 
@@ -224,11 +229,11 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
                 
-                // Sync UI Details
+                // Set Profile Details
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
+                document.getElementById('profile-email').innerText = user.email;
                 document.getElementById('user-avatar-sidebar').innerText = user.email.charAt(0);
                 document.getElementById('user-avatar-large').innerText = user.email.charAt(0);
-                document.getElementById('profile-email').innerText = user.email;
                 document.getElementById('join-date').innerText = `Member Since: ${new Date(user.metadata.creationTime).toLocaleDateString()}`;
 
                 const userRef = ref(rtdb, `users/${user.uid}/words`);
@@ -236,7 +241,6 @@
                     const data = snapshot.val();
                     cloudDb = data ? Object.entries(data).map(([key, val]) => ({...val, fbKey: key})) : [];
                     renderLibrary();
-                    // Visual Sync Indicator
                     showSyncIndicator();
                 });
             } else {
@@ -245,10 +249,11 @@
             }
         });
 
-        // --- CORE LOGIC ---
+        // --- WORD LOGIC ---
         window.searchWord = async () => {
             const word = document.getElementById('word-input').value.trim();
             if(!word) return;
+            toggleLoader(true);
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 const data = await res.json();
@@ -256,6 +261,7 @@
                 currentWordData = data[0];
                 updateSearchUI(currentWordData);
             } catch(e) { alert("Word not found."); }
+            finally { toggleLoader(false); }
         };
 
         function updateSearchUI(data) {
@@ -270,7 +276,7 @@
             const saveBtn = document.getElementById('save-word-btn');
             const exists = cloudDb.some(w => w.word.toLowerCase() === data.word.toLowerCase());
             saveBtn.disabled = exists;
-            saveBtn.innerText = exists ? "In Library ✅" : "Save to Cloud";
+            saveBtn.innerText = exists ? "Stored in Vault ✅" : "Save to Cloud";
         }
 
         window.saveToCloud = () => {
@@ -295,7 +301,6 @@
         window.renderLibrary = () => {
             const query = document.getElementById('lib-search').value.toLowerCase();
             const tagFilter = document.getElementById('lib-filter-tag').value;
-            
             let filtered = cloudDb.filter(w => {
                 const matchesSearch = w.word.toLowerCase().includes(query);
                 const matchesTag = tagFilter === "All" || w.tag === tagFilter;
@@ -303,39 +308,31 @@
             }).reverse();
             
             document.getElementById('stat-total').innerText = cloudDb.length;
-            
-            const grid = document.getElementById('library-grid');
-            grid.innerHTML = filtered.map(w => `
-                <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border dark:border-slate-700 shadow-sm relative ${w.mastered ? 'border-emerald-400 dark:border-emerald-600' : ''}">
+            document.getElementById('library-grid').innerHTML = filtered.map(w => `
+                <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border dark:border-slate-700 shadow-sm relative ${w.mastered ? 'border-emerald-400 dark:border-emerald-600 shadow-emerald-50' : ''}">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-[9px] font-black uppercase text-indigo-500 bg-indigo-50 dark:bg-slate-700 px-2 py-0.5 rounded">${w.tag || 'General'}</span>
-                        <span class="text-[9px] font-black uppercase difficulty-${w.difficulty.toLowerCase()}">${w.difficulty}</span>
+                        <span class="text-[9px] font-black uppercase text-slate-300 tracking-widest">${w.difficulty}</span>
                     </div>
-                    <h4 class="text-2xl font-black capitalize dark:text-white">${w.word}</h4>
-                    ${w.mastered ? '<span class="text-[9px] font-black text-emerald-500 mt-2 block">✓ MASTERED</span>' : '<span class="text-[9px] font-black text-slate-400 mt-2 block tracking-widest">TAP FOR INSIGHT</span>'}
+                    <h4 class="text-2xl font-black capitalize dark:text-white tracking-tight">${w.word}</h4>
+                    ${w.mastered ? '<span class="text-[9px] font-black text-emerald-500 mt-2 block tracking-widest">✓ MASTERED</span>' : '<span class="text-[9px] font-black text-slate-300 mt-2 block tracking-widest">DEEP REVIEW</span>'}
                 </div>
             `).join('');
-
-            // Update Profile Stats
-            const masteredCount = cloudDb.filter(w => w.mastered).length;
-            document.getElementById('profile-rate').innerText = cloudDb.length ? Math.round((masteredCount / cloudDb.length) * 100) : 0;
-            document.getElementById('profile-streak').innerText = [...new Set(cloudDb.map(w => new Date(w.date).toDateString()))].length;
+            updateStats();
         };
 
         window.openPreview = (fbKey) => {
             previewingWordKey = fbKey;
             const data = cloudDb.find(w => w.fbKey === fbKey);
             document.getElementById('pv-word').innerText = data.word;
-            
             const mBtn = document.getElementById('mastery-toggle-btn');
             mBtn.innerText = data.mastered ? "Mastered ✅" : "Mark Mastered";
             mBtn.className = data.mastered ? 'text-[10px] font-black uppercase px-6 py-2 rounded-full bg-emerald-500 text-white' : 'text-[10px] font-black uppercase px-6 py-2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
-
             document.getElementById('pv-meanings-container').innerHTML = data.deepData.map(d => `
                 <div class="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2.5rem] border dark:border-slate-800">
-                    <span class="text-[10px] font-black uppercase text-indigo-500 tracking-widest">${d.pos}</span>
+                    <span class="text-[10px] font-black uppercase text-indigo-500 tracking-widest block mb-4">${d.pos}</span>
                     <p class="text-2xl font-bold dark:text-slate-200 mt-2">${d.def}</p>
-                    ${d.example ? `<p class="mt-4 text-sm text-slate-500 italic">Example: "${d.example}"</p>` : ''}
+                    ${d.example ? `<p class="mt-4 text-sm text-slate-500 italic">" ${d.example} "</p>` : ''}
                 </div>
             `).join('');
             document.getElementById('word-preview-modal').classList.add('active');
@@ -347,18 +344,37 @@
             setTimeout(closePreview, 400);
         };
 
+        // --- DASHBOARD CORE ---
+        function updateStats() {
+            const today = new Date().setHours(0,0,0,0);
+            const countToday = cloudDb.filter(w => w.date >= today).length;
+            document.getElementById('daily-count-text').innerText = countToday;
+            const percent = Math.min((countToday / 5) * 100, 100);
+            document.getElementById('goal-progress-bar').style.width = `${percent}%`;
+            document.getElementById('goal-percent').innerText = `${Math.round(percent)}%`;
+
+            const masteredCount = cloudDb.filter(w => w.mastered).length;
+            document.getElementById('profile-rate').innerText = cloudDb.length ? Math.round((masteredCount / cloudDb.length) * 100) : 0;
+            document.getElementById('profile-streak').innerText = [...new Set(cloudDb.map(w => new Date(w.date).toDateString()))].length;
+        }
+
+        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.speakWord = (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
+        window.handleLogout = () => signOut(auth);
+        function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
         function showSyncIndicator() {
             const ind = document.getElementById('sync-indicator');
             ind.classList.remove('hidden');
             ind.classList.add('sync-pulse');
-            setTimeout(() => {
-                ind.classList.remove('sync-pulse');
-            }, 3000);
+            setTimeout(() => ind.classList.remove('sync-pulse'), 3000);
         }
-
-        window.handleLogout = () => signOut(auth);
-        window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
-        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.exportToExcel = () => {
+            const ws = XLSX.utils.json_to_sheet(cloudDb.map(w => ({ Word: w.word, Mastery: w.mastered, Tag: w.tag, Date: new Date(w.date).toLocaleDateString() })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Vault");
+            XLSX.writeFile(wb, "VocabularyVault_Cloud.xlsx");
+        };
     </script>
 </body>
 </html>
