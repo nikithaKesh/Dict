@@ -12,163 +12,189 @@
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .word-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .word-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         .pos-noun { background: #dbeafe; color: #1e40af; }
         .pos-verb { background: #dcfce7; color: #166534; }
         .pos-adj { background: #fef9c3; color: #854d0e; }
 
-        /* Preview Page Animation */
         #word-preview-modal { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         #word-preview-modal.active { transform: translateY(0); }
+
+        /* Login Background Animation */
+        .login-bg { background: linear-gradient(-45deg, #4f46e5, #7c3aed, #2563eb); background-size: 400% 400%; animation: gradient 15s ease infinite; }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col">
-        <nav class="p-6 flex items-center justify-between bg-white border-b">
-            <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600 hover:bg-indigo-100 hover:text-indigo-600 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
-            <span class="font-bold text-slate-400 tracking-widest uppercase text-xs">Word Insight</span>
-            <div class="w-12"></div> </nav>
-
-        <div class="flex-1 overflow-y-auto p-8 md:p-20 flex flex-col items-center justify-center text-center">
-            <div id="pv-pos" class="inline-block px-4 py-1 rounded-full text-xs font-black uppercase mb-6">NOUN</div>
-            <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-4 tracking-tighter">Word</h1>
-            <p id="pv-date" class="text-slate-400 font-medium mb-12 italic"></p>
-            
-            <div class="max-w-3xl bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-slate-100 relative">
-                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg">Definition</div>
-                <p id="pv-def" class="text-2xl md:text-3xl text-slate-700 leading-relaxed font-light italic">"Detailed definition goes here..."</p>
+    <div id="login-page" class="fixed inset-0 z-[200] flex items-center justify-center login-bg p-6">
+        <div class="bg-white/90 backdrop-blur-xl p-8 md:p-12 rounded-[3rem] shadow-2xl w-full max-w-md text-center">
+            <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-white shadow-xl shadow-indigo-200">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             </div>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">WordVault</h2>
+            <p class="text-slate-500 mb-8 font-medium">Please enter your name to access your library</p>
             
-            <div class="mt-12">
-                <button onclick="speakWordInPreview()" class="bg-slate-900 text-white px-10 py-5 rounded-2xl font-black flex items-center gap-3 shadow-2xl hover:bg-indigo-600 transition-all active:scale-95">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            <input id="login-username" type="text" placeholder="Your Name" class="w-full p-5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-indigo-100 transition-all text-center text-lg font-bold mb-4" onkeypress="if(event.key==='Enter') handleLogin()">
+            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">Enter Vault</button>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col">
+            <nav class="p-6 flex items-center justify-between bg-white border-b">
+                <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span class="font-bold text-slate-400 uppercase text-xs">Word Insight</span>
+                <div class="w-12"></div> 
+            </nav>
+            <div class="flex-1 overflow-y-auto p-8 md:p-20 flex flex-col items-center justify-center text-center">
+                <div id="pv-pos" class="inline-block px-4 py-1 rounded-full text-xs font-black uppercase mb-6">NOUN</div>
+                <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-4 tracking-tighter">Word</h1>
+                <p id="pv-date" class="text-slate-400 font-medium mb-12 italic"></p>
+                <div class="max-w-3xl bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-slate-100 relative">
+                    <p id="pv-def" class="text-2xl md:text-3xl text-slate-700 leading-relaxed font-light italic"></p>
+                </div>
+                <button onclick="speakWordInPreview()" class="mt-12 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black flex items-center gap-3">
                     Listen Pronunciation
                 </button>
             </div>
         </div>
-    </div>
 
-    <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white border-t lg:border-t-0 lg:border-r z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-8 p-4">
-        <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg shadow-indigo-200">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-        </div>
-        <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </button>
-        <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-        </button>
-        <div class="lg:mt-auto">
-            <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-500">?</div>
-        </div>
-    </aside>
-
-    <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-            <div>
-                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Your Dictionary</h1>
-                <p class="text-slate-500 mt-1">Hello <span id="user-name-display" class="font-semibold text-indigo-600">Learner</span>, ready for a deep dive?</p>
+        <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white border-t lg:border-t-0 lg:border-r z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-8 p-4">
+            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             </div>
-            
-            <div class="flex items-center gap-3">
-                <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-                    <span class="text-[10px] uppercase font-black text-slate-400">Total</span>
-                    <span id="stat-total" class="text-xl font-bold text-slate-900">0</span>
+            <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+            <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </button>
+            <div class="lg:mt-auto flex flex-col items-center gap-4">
+                <button onclick="handleLogout()" class="text-[10px] font-black uppercase text-red-400 hover:text-red-600 transition-colors">Logout</button>
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-500 uppercase">?</div>
+            </div>
+        </aside>
+
+        <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Your Dictionary</h1>
+                    <p class="text-slate-500 mt-1 italic">Welcome back, <span id="user-name-display" class="font-black text-indigo-600">Learner</span></p>
                 </div>
-                <div class="bg-indigo-600 px-6 py-3 rounded-2xl shadow-lg shadow-indigo-100 flex flex-col items-center text-white">
-                    <span class="text-[10px] uppercase font-black text-indigo-200">Today</span>
-                    <span id="stat-today" class="text-xl font-bold">0</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="relative group max-w-3xl mx-auto mb-16">
-            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-25 transition duration-1000"></div>
-            <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
-                <input id="word-input" type="text" placeholder="Search new word..." class="w-full bg-transparent p-4 outline-none text-lg font-medium" onkeypress="if(event.key==='Enter') searchWord()">
-                <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Search</button>
-            </div>
-        </div>
-
-        <section id="search-result" class="hidden max-w-3xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                <div class="flex justify-between items-start relative z-10">
-                    <div>
-                        <div id="result-pos-tag" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-4">NOUN</div>
-                        <h2 id="result-word" class="text-6xl font-black text-slate-900 capitalize mb-2">Word</h2>
-                        <p id="result-phonetic" class="text-indigo-500 font-semibold tracking-wide">/phonetic/</p>
+                <div class="flex items-center gap-3">
+                    <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center min-w-[100px]">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Total</span>
+                        <span id="stat-total" class="text-xl font-bold text-slate-900">0</span>
                     </div>
-                    <button id="audio-btn" class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:shadow-md transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
-                    </button>
-                </div>
-                <div class="mt-8 space-y-6 relative z-10">
-                    <div class="p-6 bg-white/50 rounded-2xl border border-white">
-                        <p id="result-definition" class="text-xl text-slate-700 leading-relaxed italic"></p>
+                    <div class="bg-indigo-600 px-6 py-3 rounded-2xl shadow-lg shadow-indigo-100 flex flex-col items-center text-white min-w-[100px]">
+                        <span class="text-[10px] uppercase font-black text-indigo-200 tracking-widest">Today</span>
+                        <span id="stat-today" class="text-xl font-bold">0</span>
                     </div>
                 </div>
-                <button id="save-word-btn" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all flex items-center justify-center gap-3">
-                    Add to Library
-                </button>
-            </div>
-        </section>
+            </header>
 
-        <section>
-            <div class="flex items-center justify-between mb-8">
-                <h3 class="text-2xl font-black text-slate-900 tracking-tight">Vocabulary Gallery</h3>
-                <div class="flex items-center gap-2">
-                    <select id="sort-filter" onchange="renderLibrary()" class="bg-transparent font-semibold text-slate-400 outline-none cursor-pointer hover:text-indigo-600 transition-colors">
+            <div class="relative group max-w-3xl mx-auto mb-16">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-25 transition duration-1000"></div>
+                <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
+                    <input id="word-input" type="text" placeholder="Search new word..." class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
+                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Find</button>
+                </div>
+            </div>
+
+            <section id="search-result" class="hidden max-w-3xl mx-auto mb-20">
+                <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div id="result-pos-tag" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase mb-4">NOUN</div>
+                            <h2 id="result-word" class="text-6xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h2>
+                            <p id="result-phonetic" class="text-indigo-500 font-semibold">/phonetic/</p>
+                        </div>
+                        <button id="audio-btn" class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="p-6 bg-white/50 rounded-2xl border border-white mt-8 mb-10">
+                        <p id="result-definition" class="text-xl text-slate-700 leading-relaxed font-light"></p>
+                    </div>
+                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all">Add to Library</button>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-2xl font-black text-slate-900">Vocabulary Gallery</h3>
+                    <select id="sort-filter" onchange="renderLibrary()" class="bg-transparent font-semibold text-slate-400 outline-none cursor-pointer hover:text-indigo-600">
                         <option value="newest">Recently Added</option>
                         <option value="az">Alphabetical</option>
                     </select>
                 </div>
-            </div>
-
-            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-        </section>
-    </main>
+                <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+        </main>
+    </div>
 
     <script>
         const API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
-        let db = JSON.parse(localStorage.getItem('word_vault_pro')) || [];
+        let db = [];
         let currentWord = null;
+        let currentUser = null;
+
+        // --- LOGIN LOGIC ---
+        function handleLogin() {
+            const input = document.getElementById('login-username').value.trim();
+            if (!input) return alert("Please enter your name!");
+            
+            currentUser = input;
+            localStorage.setItem('word_vault_user', currentUser);
+            initApp();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('word_vault_user');
+            location.reload();
+        }
+
+        function initApp() {
+            // Hide login, show app
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Set User Details
+            document.getElementById('user-name-display').innerText = currentUser;
+            document.getElementById('user-avatar').innerText = currentUser.charAt(0);
+            
+            // Load User-Specific Data
+            const userKey = `word_vault_data_${currentUser.toLowerCase()}`;
+            db = JSON.parse(localStorage.getItem(userKey)) || [];
+            
+            renderLibrary();
+        }
 
         // --- SEARCH LOGIC ---
         async function searchWord() {
-            const input = document.getElementById('word-input');
-            const word = input.value.trim();
+            const word = document.getElementById('word-input').value.trim();
             if (!word) return;
-
             try {
                 const res = await fetch(`${API_URL}${word}`);
                 const data = await res.json();
-                if (data.title) throw "Word not found";
-                
+                if (data.title) throw "Error";
                 currentWord = data[0];
-                updateUI(currentWord);
-            } catch (e) {
-                alert("Couldn't find that word. Check your spelling!");
-            }
+                updateSearchUI(currentWord);
+            } catch (e) { alert("Word not found!"); }
         }
 
-        function updateUI(data) {
-            const section = document.getElementById('search-result');
-            section.classList.remove('hidden');
+        function updateSearchUI(data) {
+            document.getElementById('search-result').classList.remove('hidden');
             document.getElementById('result-word').innerText = data.word;
             document.getElementById('result-phonetic').innerText = data.phonetic || '';
             const meaning = data.meanings[0];
             document.getElementById('result-definition').innerText = meaning.definitions[0].definition;
+            
             const posTag = document.getElementById('result-pos-tag');
             posTag.innerText = meaning.partOfSpeech;
-            posTag.className = `inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-4 pos-${meaning.partOfSpeech.toLowerCase()}`;
-
-            const audioLink = data.phonetics.find(p => p.audio)?.audio;
-            document.getElementById('audio-btn').onclick = audioLink ? () => new Audio(audioLink).play() : () => speakWord(data.word);
+            posTag.className = `inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase mb-4 pos-${meaning.partOfSpeech.toLowerCase()}`;
 
             const saveBtn = document.getElementById('save-word-btn');
             const exists = db.some(w => w.word.toLowerCase() === data.word.toLowerCase());
@@ -177,7 +203,6 @@
             saveBtn.onclick = () => saveToDb(data);
         }
 
-        // --- STORAGE & STATS ---
         function saveToDb(data) {
             const wordObj = {
                 word: data.word,
@@ -186,7 +211,10 @@
                 date: new Date().getTime()
             };
             db.unshift(wordObj);
-            localStorage.setItem('word_vault_pro', JSON.stringify(db));
+            
+            const userKey = `word_vault_data_${currentUser.toLowerCase()}`;
+            localStorage.setItem(userKey, JSON.stringify(db));
+            
             renderLibrary();
             document.getElementById('search-result').classList.add('hidden');
             document.getElementById('word-input').value = "";
@@ -202,7 +230,7 @@
             grid.innerHTML = displayData.map(w => `
                 <div onclick="openPreview(${w.date})" class="word-card bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group">
                     <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                     <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-black uppercase mb-3 pos-${w.pos.toLowerCase()}">${w.pos}</span>
                     <h4 class="text-xl font-bold text-slate-900 capitalize mb-2">${w.word}</h4>
@@ -216,38 +244,26 @@
         function openPreview(timestamp) {
             const wordData = db.find(w => w.date === timestamp);
             if(!wordData) return;
-
             document.getElementById('pv-word').innerText = wordData.word;
             document.getElementById('pv-def').innerText = wordData.def;
-            document.getElementById('pv-date').innerText = `Unlocked in library on ${new Date(wordData.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`;
-            
+            document.getElementById('pv-date').innerText = `Learned on ${new Date(wordData.date).toLocaleDateString()}`;
             const posTag = document.getElementById('pv-pos');
             posTag.innerText = wordData.pos;
             posTag.className = `inline-block px-4 py-1 rounded-full text-xs font-black uppercase mb-6 pos-${wordData.pos.toLowerCase()}`;
-
             document.getElementById('word-preview-modal').classList.add('active');
         }
 
-        function closePreview() {
-            document.getElementById('word-preview-modal').classList.remove('active');
-        }
+        function closePreview() { document.getElementById('word-preview-modal').classList.remove('active'); }
 
         function speakWordInPreview() {
-            const text = document.getElementById('pv-word').innerText;
-            speakWord(text);
-        }
-
-        function speakWord(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.9;
+            const msg = new SpeechSynthesisUtterance(document.getElementById('pv-word').innerText);
             window.speechSynthesis.speak(msg);
         }
 
-        // --- UTILS ---
         function deleteWord(timestamp) {
-            if(confirm("Remove this word from your gallery?")) {
+            if(confirm("Remove from library?")) {
                 db = db.filter(w => w.date !== timestamp);
-                localStorage.setItem('word_vault_pro', JSON.stringify(db));
+                localStorage.setItem(`word_vault_data_${currentUser.toLowerCase()}`, JSON.stringify(db));
                 renderLibrary();
             }
         }
@@ -256,19 +272,25 @@
             document.getElementById('stat-total').innerText = db.length;
             const startOfDay = new Date().setHours(0,0,0,0);
             document.getElementById('stat-today').innerText = db.filter(w => w.date >= startOfDay).length;
-            document.getElementById('user-avatar').innerText = "N";
-            document.getElementById('user-name-display').innerText = "Nikitha";
         }
 
         function exportToExcel() {
             const ws = XLSX.utils.json_to_sheet(db);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Gallery");
-            XLSX.writeFile(wb, "Nikitha_WordVault.xlsx");
+            XLSX.writeFile(wb, `${currentUser}_Vocabulary.xlsx`);
         }
 
         function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        window.onload = renderLibrary;
+
+        // --- CHECK ON LOAD ---
+        window.onload = () => {
+            const savedUser = localStorage.getItem('word_vault_user');
+            if (savedUser) {
+                currentUser = savedUser;
+                initApp();
+            }
+        };
     </script>
 </body>
 </html>
