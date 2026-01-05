@@ -3,216 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordVault Pro | Vocabulary OS</title>
+    <title>WordVault | Premium Vocabulary</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .loader { border-top-color: #4f46e5; animation: spinner 0.6s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Outfit', sans-serif; background: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .word-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .word-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .pos-noun { background: #dbeafe; color: #1e40af; }
+        .pos-verb { background: #dcfce7; color: #166534; }
+        .pos-adj { background: #fef9c3; color: #854d0e; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen pb-20">
+<body class="min-h-screen">
 
-    <nav class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="bg-indigo-600 p-2 rounded-lg text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                </div>
-                <span class="font-extrabold text-xl tracking-tight">WordVault <span class="text-indigo-600">Pro</span></span>
-            </div>
-            <button onclick="exportToExcel()" class="text-xs bg-slate-900 text-white px-4 py-2 rounded-full font-bold hover:bg-slate-700 transition-all flex items-center gap-2">
-                Download Excel
-            </button>
+    <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white border-t lg:border-t-0 lg:border-r z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-8 p-4">
+        <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg shadow-indigo-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
         </div>
-    </nav>
+        <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </button>
+        <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </button>
+        <div class="lg:mt-auto">
+            <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-500">?</div>
+        </div>
+    </aside>
 
-    <main class="max-w-5xl mx-auto px-6 mt-8">
+    <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
         
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-slate-500 text-xs font-bold uppercase">Total Words</p>
-                <h4 id="stat-total" class="text-2xl font-black">0</h4>
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Your Dictionary</h1>
+                <p class="text-slate-500 mt-1">Hello <span id="user-name-display" class="font-semibold text-indigo-600">Learner</span>, what are we studying today?</p>
             </div>
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-slate-500 text-xs font-bold uppercase">Daily Goal</p>
-                <h4 class="text-2xl font-black"><span id="stat-today">0</span>/5</h4>
+            
+            <div class="flex items-center gap-3">
+                <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
+                    <span class="text-[10px] uppercase font-black text-slate-400">Learned</span>
+                    <span id="stat-total" class="text-xl font-bold text-slate-900">0</span>
+                </div>
+                <div class="bg-indigo-600 px-6 py-3 rounded-2xl shadow-lg shadow-indigo-100 flex flex-col items-center text-white">
+                    <span class="text-[10px] uppercase font-black text-indigo-200">Today</span>
+                    <span id="stat-today" class="text-xl font-bold">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="relative group max-w-3xl mx-auto mb-16">
+            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-25 transition duration-1000"></div>
+            <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
+                <input id="word-input" type="text" placeholder="Type any English word..." class="w-full bg-transparent p-4 outline-none text-lg font-medium" onkeypress="if(event.key==='Enter') searchWord()">
+                <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Search</button>
             </div>
         </div>
 
-        <div class="mb-10">
-            <div class="relative flex gap-2">
-                <input id="search-input" type="text" placeholder="Search new word..." class="w-full p-4 rounded-2xl border-0 shadow-lg ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-indigo-600 text-lg" onkeypress="if(event.key==='Enter') fetchWord()">
-                <button id="search-btn" onclick="fetchWord()" class="bg-indigo-600 text-white px-8 rounded-2xl font-bold hover:bg-indigo-700 transition-all">Find</button>
-            </div>
-            <div id="loading" class="hidden mt-4 flex justify-center">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
-            </div>
-        </div>
-
-        <div id="result-card" class="hidden animate-in fade-in slide-in-from-top-4 duration-300 mb-12">
-            <div class="bg-white rounded-3xl p-8 shadow-xl border-t-4 border-indigo-600 relative">
-                <div id="word-header" class="flex flex-wrap justify-between items-start gap-4 mb-6">
+        <section id="search-result" class="hidden max-w-3xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                <div class="flex justify-between items-start relative z-10">
+                    <div>
+                        <div id="result-pos-tag" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-4">NOUN</div>
+                        <h2 id="result-word" class="text-6xl font-black text-slate-900 capitalize mb-2">Word</h2>
+                        <p id="result-phonetic" class="text-indigo-500 font-semibold tracking-wide">/phonetic/</p>
                     </div>
-                <div id="meanings-container" class="space-y-6">
+                    <button id="audio-btn" class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:shadow-md transition-all active:scale-90">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    </button>
+                </div>
+
+                <div class="mt-8 space-y-6 relative z-10">
+                    <div class="p-6 bg-white/50 rounded-2xl border border-white">
+                        <p id="result-definition" class="text-xl text-slate-700 leading-relaxed italic">The definition of the word will appear here.</p>
                     </div>
-                <button id="save-btn" onclick="saveWord()" class="mt-8 w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 disabled:bg-slate-200 disabled:cursor-not-allowed transition-all">Mark as Learned</button>
-            </div>
-        </div>
+                    
+                    <div id="synonym-box" class="hidden">
+                        <p class="text-xs font-black uppercase text-slate-400 mb-2">Synonyms</p>
+                        <div id="result-synonyms" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <h3 class="text-2xl font-black">My Vocabulary</h3>
-            <div class="flex gap-2">
-                <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search learned words..." class="text-sm p-2 rounded-lg border bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <select id="lib-sort" onchange="renderLibrary()" class="text-sm p-2 rounded-lg border bg-white outline-none">
-                    <option value="recent">Most Recent</option>
-                    <option value="az">A - Z</option>
-                </select>
+                <button id="save-word-btn" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl shadow-slate-200 transition-all flex items-center justify-center gap-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    Add to Library
+                </button>
             </div>
-        </div>
+        </section>
 
-        <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <section>
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-black text-slate-900">Vocabulary Library</h3>
+                <div class="flex items-center gap-2">
+                    <select id="sort-filter" onchange="renderLibrary()" class="bg-transparent font-semibold text-slate-500 outline-none cursor-pointer">
+                        <option value="newest">Newest First</option>
+                        <option value="az">A to Z</option>
+                    </select>
+                </div>
             </div>
+
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </section>
     </main>
 
     <script>
         const API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
-        let currentWordData = null;
-        let learnedLibrary = JSON.parse(localStorage.getItem('vault_pro_data')) || [];
+        let db = JSON.parse(localStorage.getItem('word_vault_pro')) || [];
+        let currentWord = null;
 
-        // --- FETCH LOGIC ---
-        async function fetchWord() {
-            const word = document.getElementById('search-input').value.trim();
+        async function searchWord() {
+            const input = document.getElementById('word-input');
+            const word = input.value.trim();
             if (!word) return;
 
-            toggleLoading(true);
             try {
-                const response = await fetch(`${API_URL}${word}`);
-                const data = await response.json();
-
-                if (data.title) throw new Error("Not found");
-
-                currentWordData = data[0];
-                displayWord(currentWordData);
-            } catch (err) {
-                alert("Word not found. Try another one!");
-                document.getElementById('result-card').classList.add('hidden');
-            } finally {
-                toggleLoading(false);
+                const res = await fetch(`${API_URL}${word}`);
+                const data = await res.json();
+                if (data.title) throw "Word not found";
+                
+                currentWord = data[0];
+                updateUI(currentWord);
+            } catch (e) {
+                alert("Couldn't find that word. Check your spelling!");
             }
         }
 
-        function toggleLoading(isLoading) {
-            document.getElementById('loading').classList.toggle('hidden', !isLoading);
-            document.getElementById('search-btn').disabled = isLoading;
-        }
-
-        // --- DISPLAY LOGIC ---
-        function displayWord(data) {
-            const card = document.getElementById('result-card');
-            const header = document.getElementById('word-header');
-            const container = document.getElementById('meanings-container');
-            const saveBtn = document.getElementById('save-btn');
-
-            card.classList.remove('hidden');
+        function updateUI(data) {
+            const section = document.getElementById('search-result');
+            section.classList.remove('hidden');
             
-            // Duplicate check
-            const isAlreadyLearned = learnedLibrary.some(w => w.word.toLowerCase() === data.word.toLowerCase());
-            saveBtn.disabled = isAlreadyLearned;
-            saveBtn.innerText = isAlreadyLearned ? "Already in Library" : "Mark as Learned";
+            document.getElementById('result-word').innerText = data.word;
+            document.getElementById('result-phonetic').innerText = data.phonetic || '';
+            
+            const meaning = data.meanings[0];
+            const def = meaning.definitions[0].definition;
+            const pos = meaning.partOfSpeech;
+            
+            document.getElementById('result-definition').innerText = def;
+            
+            // POS Styling
+            const posTag = document.getElementById('result-pos-tag');
+            posTag.innerText = pos;
+            posTag.className = `inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-4 pos-${pos.toLowerCase()}`;
 
-            // Header (Audio + Text)
-            const audioSrc = data.phonetics.find(p => p.audio)?.audio || "";
-            header.innerHTML = `
-                <div>
-                    <h2 class="text-5xl font-black capitalize">${data.word}</h2>
-                    <p class="text-indigo-500 font-bold">${data.phonetic || ''}</p>
-                </div>
-                ${audioSrc ? `<button onclick="new Audio('${audioSrc}').play()" class="bg-indigo-100 p-4 rounded-full text-indigo-600 hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                </button>` : ''}
-            `;
+            // Synonyms
+            const synBox = document.getElementById('synonym-box');
+            const synList = document.getElementById('result-synonyms');
+            if (meaning.synonyms.length > 0) {
+                synBox.classList.remove('hidden');
+                synList.innerHTML = meaning.synonyms.slice(0, 5).map(s => `<span class="px-3 py-1 bg-white rounded-lg text-xs font-semibold border border-slate-100 text-slate-500">${s}</span>`).join('');
+            } else {
+                synBox.classList.add('hidden');
+            }
 
-            // Meanings (Limit to top 2 for clarity)
-            container.innerHTML = data.meanings.slice(0, 2).map(m => `
-                <div class="border-l-4 border-slate-100 pl-4">
-                    <span class="text-xs font-black uppercase text-slate-400 tracking-widest">${m.partOfSpeech}</span>
-                    <p class="text-lg text-slate-700 my-2">${m.definitions[0].definition}</p>
-                    ${m.synonyms.length ? `<p class="text-sm text-slate-500"><span class="font-bold">Synonyms:</span> ${m.synonyms.slice(0,3).join(', ')}</p>` : ''}
-                </div>
-            `).join('');
+            // Audio
+            const audioBtn = document.getElementById('audio-btn');
+            const audioLink = data.phonetics.find(p => p.audio)?.audio;
+            audioBtn.onclick = audioLink ? () => new Audio(audioLink).play() : () => alert("No audio available");
+
+            // Save Button Logic
+            const saveBtn = document.getElementById('save-word-btn');
+            const exists = db.some(w => w.word.toLowerCase() === data.word.toLowerCase());
+            saveBtn.disabled = exists;
+            saveBtn.innerText = exists ? "Learned ✅" : "Add to Library";
+            saveBtn.onclick = () => saveToDb(data);
         }
 
-        // --- STORAGE LOGIC ---
-        function saveWord() {
+        function saveToDb(data) {
             const wordObj = {
-                word: currentWordData.word,
-                definition: currentWordData.meanings[0].definitions[0].definition,
-                pos: currentWordData.meanings[0].partOfSpeech,
-                date: new Date().toISOString(),
-                synonyms: currentWordData.meanings[0].synonyms.slice(0, 3)
+                word: data.word,
+                pos: data.meanings[0].partOfSpeech,
+                def: data.meanings[0].definitions[0].definition,
+                date: new Date().getTime()
             };
-
-            learnedLibrary.unshift(wordObj);
-            localStorage.setItem('vault_pro_data', JSON.stringify(learnedLibrary));
-            
-            document.getElementById('save-btn').disabled = true;
-            document.getElementById('save-btn').innerText = "Saved!";
+            db.unshift(wordObj);
+            localStorage.setItem('word_vault_pro', JSON.stringify(db));
             renderLibrary();
+            document.getElementById('search-result').classList.add('hidden');
+            document.getElementById('word-input').value = "";
         }
 
-        function deleteWord(word) {
-            learnedLibrary = learnedLibrary.filter(w => w.word !== word);
-            localStorage.setItem('vault_pro_data', JSON.stringify(learnedLibrary));
-            renderLibrary();
-        }
-
-        // --- RENDER & STATS ---
         function renderLibrary() {
             const grid = document.getElementById('library-grid');
-            const searchTerm = document.getElementById('lib-search').value.toLowerCase();
-            const sortBy = document.getElementById('lib-sort').value;
+            const sort = document.getElementById('sort-filter').value;
+            
+            let displayData = [...db];
+            if (sort === 'az') displayData.sort((a,b) => a.word.localeCompare(b.word));
+            if (sort === 'newest') displayData.sort((a,b) => b.date - a.date);
 
-            let filtered = learnedLibrary.filter(w => w.word.toLowerCase().includes(searchTerm));
-
-            if (sortBy === 'az') filtered.sort((a,b) => a.word.localeCompare(b.word));
-            if (sortBy === 'recent') filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            grid.innerHTML = filtered.map(w => `
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-                    <div class="flex justify-between items-start mb-2">
-                        <h5 class="text-xl font-bold capitalize text-indigo-600">${w.word}</h5>
-                        <button onclick="deleteWord('${w.word}')" class="text-slate-300 hover:text-red-500">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                        </button>
-                    </div>
-                    <p class="text-xs font-bold text-slate-400 mb-2 uppercase">${w.pos}</p>
-                    <p class="text-sm text-slate-600 line-clamp-2 mb-4">${w.definition}</p>
-                    <p class="text-[10px] text-slate-400 font-medium">Added on ${new Date(w.date).toLocaleDateString()}</p>
+            grid.innerHTML = displayData.map(w => `
+                <div class="word-card bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group">
+                    <button onclick="deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-black uppercase mb-3 pos-${w.pos.toLowerCase()}">${w.pos}</span>
+                    <h4 class="text-xl font-bold text-slate-900 capitalize mb-2">${w.word}</h4>
+                    <p class="text-sm text-slate-500 line-clamp-3">${w.def}</p>
                 </div>
             `).join('');
 
             updateStats();
         }
 
-        function updateStats() {
-            document.getElementById('stat-total').innerText = learnedLibrary.length;
-            const today = new Date().toLocaleDateString();
-            const learnedToday = learnedLibrary.filter(w => new Date(w.date).toLocaleDateString() === today).length;
-            document.getElementById('stat-today').innerText = learnedToday;
+        function deleteWord(timestamp) {
+            db = db.filter(w => w.date !== timestamp);
+            localStorage.setItem('word_vault_pro', JSON.stringify(db));
+            renderLibrary();
         }
 
-        // --- EXPORT TO EXCEL ---
-        function exportToExcel() {
-            if (learnedLibrary.length === 0) return alert("Nothing to export!");
+        function updateStats() {
+            document.getElementById('stat-total').innerText = db.length;
+            const startOfDay = new Date().setHours(0,0,0,0);
+            const todayCount = db.filter(w => w.date >= startOfDay).length;
+            document.getElementById('stat-today').innerText = todayCount;
             
-            const worksheet = XLSX.utils.json_to_sheet(learnedLibrary);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "My Vocabulary");
-            XLSX.writeFile(workbook, "MyLearnedWords.xlsx");
+            // Set User Avatar (First letter of name if available)
+            document.getElementById('user-avatar').innerText = "N"; // Based on your profile
+            document.getElementById('user-name-display').innerText = "Nikitha";
         }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(db);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Learned Words");
+            XLSX.writeFile(wb, "MyVocabulary.xlsx");
+        }
+
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
         window.onload = renderLibrary;
     </script>
