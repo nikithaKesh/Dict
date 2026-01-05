@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordVault Pro | Ultimate Vocabulary OS</title>
+    <title>CodeNest | WordVault Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -25,11 +25,26 @@
 <body class="min-h-screen pb-20">
 
     <div id="login-screen" class="fixed inset-0 z-[200] bg-indigo-700 flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center">
-            <h2 class="text-3xl font-black text-slate-900 mb-2">Vault Login</h2>
-            <p class="text-slate-500 mb-8">Enter your name to unlock your vault</p>
-            <input id="login-input" type="text" placeholder="Nikitha..." class="w-full p-4 rounded-2xl border mb-4 outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold text-lg">
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Enter Vault</button>
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full transition-all duration-300">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <h2 id="auth-title" class="text-3xl font-black text-slate-900 tracking-tight">Vault Login</h2>
+                <p id="auth-subtitle" class="text-slate-500 text-sm mt-2">Access your CodeNest vocabulary</p>
+            </div>
+
+            <div class="space-y-4">
+                <input id="auth-email" type="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
+                <input id="auth-pass" type="password" placeholder="Password" class="w-full p-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
+                
+                <button onclick="handleAuth()" id="auth-submit-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-800 transition-all shadow-xl active:scale-95">Unlock Vault</button>
+                
+                <p class="text-xs text-center text-slate-400 font-medium">
+                    <span id="toggle-msg">New to WordVault?</span>
+                    <button onclick="toggleAuthMode()" id="toggle-btn" class="text-indigo-600 font-bold underline ml-1">Create Account</button>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -38,73 +53,67 @@
             <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600 hover:bg-indigo-600 hover:text-white transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Full Vocabulary Insight</span>
+            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Deep Review</span>
             <div class="w-12"></div>
         </nav>
         <div class="flex-1 overflow-y-auto p-6 md:p-16 bg-white">
-            <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-12">
-                    <div id="pv-diff" class="text-[10px] font-black uppercase tracking-widest mb-2">HARD</div>
-                    <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
-                    <p id="pv-date" class="text-slate-400 font-medium italic mb-6"></p>
-                    <button onclick="speakWord(document.getElementById('pv-word').innerText)" class="bg-indigo-50 text-indigo-600 px-8 py-3 rounded-full font-bold text-sm hover:bg-indigo-100 transition-all">Listen Pronunciation</button>
-                </div>
-                
-                <div id="pv-meanings-container" class="space-y-10">
-                    </div>
+            <div class="max-w-4xl mx-auto text-center">
+                <div id="pv-diff" class="text-[10px] font-black uppercase tracking-widest mb-2">HARD</div>
+                <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
+                <p id="pv-date" class="text-slate-400 font-medium italic mb-10"></p>
+                <div id="pv-meanings-list" class="space-y-8 text-left max-w-2xl mx-auto"></div>
+                <button onclick="speakWord(document.getElementById('pv-word').innerText)" class="mt-12 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black shadow-2xl active:scale-95">Listen Pronunciation</button>
             </div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
         <aside class="fixed bottom-0 left-0 w-full lg:w-20 lg:h-full lg:top-0 bg-white border-t lg:border-t-0 lg:border-r z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-8 p-4">
-            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg shadow-indigo-100 font-bold">W</div>
+            <div class="hidden lg:flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-auto text-white shadow-lg font-black italic">CN</div>
             <button onclick="scrollToTop()" class="p-3 text-slate-400 hover:text-indigo-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
             <button onclick="exportToExcel()" class="p-3 text-slate-400 hover:text-green-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
             <button onclick="handleLogout()" class="lg:mt-auto text-slate-300 hover:text-red-500 transition-colors p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
         </aside>
 
         <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
-            <header class="mb-12">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                    <div>
-                        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Vocabulary OS</h1>
-                        <p class="text-slate-500 mt-1 italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600">Learner</span></p>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
-                            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Total Words</span>
-                            <h4 id="stat-total" class="text-2xl font-black">0</h4>
-                        </div>
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
-                            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Past 7 Days</span>
-                            <h4 id="stat-weekly" class="text-2xl font-black text-indigo-600">0</h4>
-                        </div>
-                    </div>
+            <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Vocabulary OS</h1>
+                    <p class="text-slate-500 mt-1 italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600 tracking-wide">...</span></p>
                 </div>
-                
-                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-xs font-black text-slate-700 uppercase tracking-widest">Daily Focus: <span id="daily-count-text" class="text-indigo-600">0</span>/5 Words</span>
-                        <span id="goal-percent" class="text-xs font-black text-indigo-600">0%</span>
+                <div class="flex gap-4">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Total Words</span>
+                        <h4 id="stat-total" class="text-2xl font-black">0</h4>
                     </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div id="goal-progress-bar" class="progress-fill bg-indigo-600 h-full w-0"></div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Goal Focus</span>
+                        <h4 id="stat-weekly" class="text-2xl font-black text-indigo-600">0</h4>
                     </div>
                 </div>
             </header>
+
+            <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm mb-12">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-black text-slate-700 uppercase">Today's Progress: <span id="daily-count-text" class="text-indigo-600">0</span>/5 Words</span>
+                    <span id="goal-percent" class="text-xs font-black text-indigo-600 tracking-tighter">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="goal-progress-bar" class="progress-fill bg-indigo-600 h-full w-0"></div>
+                </div>
+            </div>
 
             <div class="relative group max-w-3xl mx-auto mb-16">
                 <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-1000"></div>
                 <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
                     <input id="word-input" type="text" placeholder="Explore a new word..." class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
                     <div id="search-loader" class="loader mr-4"></div>
-                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Search</button>
+                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Find Word</button>
                 </div>
             </div>
 
             <section id="search-result" class="hidden max-w-3xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-500">
-                <div class="glass p-8 md:p-12 rounded-[3rem] shadow-2xl relative">
+                <div class="glass p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
                     <div class="flex justify-between items-start mb-10">
                         <div>
                             <div id="result-diff-tag" class="text-[10px] font-black uppercase mb-1 tracking-widest">MEDIUM</div>
@@ -116,23 +125,16 @@
                         </button>
                     </div>
 
-                    <div id="meanings-stack" class="space-y-8 mb-10">
-                        </div>
+                    <div id="meanings-stack" class="space-y-8 mb-10"></div>
 
-                    <div id="thesaurus-box" class="hidden mb-12 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                    <div id="thesaurus-box" class="hidden mb-12 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
                         <div class="grid grid-cols-2 gap-8">
-                            <div>
-                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Synonyms</p>
-                                <div id="synonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-indigo-600"></div>
-                            </div>
-                            <div>
-                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Antonyms</p>
-                                <div id="antonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-red-500"></div>
-                            </div>
+                            <div><p class="text-[9px] font-black uppercase text-slate-400 mb-2">Synonyms</p><div id="synonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-indigo-600"></div></div>
+                            <div><p class="text-[9px] font-black uppercase text-slate-400 mb-2">Antonyms</p><div id="antonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-red-500"></div></div>
                         </div>
                     </div>
 
-                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all">Mark as Learned</button>
+                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all active:scale-[0.98]">Mark as Learned</button>
                 </div>
             </section>
 
@@ -140,8 +142,8 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <h3 class="text-2xl font-black text-slate-900 tracking-tight">Vocabulary Library</h3>
                     <div class="flex flex-1 max-w-md gap-2">
-                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search saved words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500">
-                        <select id="sort-filter" onchange="renderLibrary()" class="bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none cursor-pointer font-bold text-slate-500">
+                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search my words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500 font-medium">
+                        <select id="sort-filter" onchange="renderLibrary()" class="bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none cursor-pointer font-bold text-slate-400">
                             <option value="newest">Latest</option>
                             <option value="az">A-Z</option>
                         </select>
@@ -152,39 +154,73 @@
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALVLkn_ajWsnEjn3icZRBt3R3NeyxpbnA",
+            authDomain: "dict-41d8e.firebaseapp.com",
+            projectId: "dict-41d8e",
+            storageBucket: "dict-41d8e.firebasestorage.app",
+            messagingSenderId: "1087434290364",
+            appId: "1:1087434290364:web:1884ed7a1cbe93ecfc4cb9",
+            measurementId: "G-XX2C7JYQXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
         const API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
         let db = [];
         let currentWordData = null;
-        let currentUser = null;
+        let isSignUpMode = false;
+        let activeUser = null;
 
-        // --- AUTH & SETUP ---
-        function handleLogin() {
-            const name = document.getElementById('login-input').value.trim();
-            if(!name) return alert("Please enter your name");
-            currentUser = name;
-            localStorage.setItem('word_vault_user', name);
-            initApp();
-        }
+        // --- AUTH SYSTEM ---
+        window.toggleAuthMode = () => {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('auth-title').innerText = isSignUpMode ? "Create Account" : "Vault Login";
+            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Join the CodeNest community" : "Access your CodeNest vocabulary";
+            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Start Learning" : "Unlock Vault";
+            document.getElementById('toggle-msg').innerText = isSignUpMode ? "Already a member?" : "New to WordVault?";
+            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Login here" : "Create Account";
+        };
 
-        function handleLogout() {
-            localStorage.removeItem('word_vault_user');
-            location.reload();
-        }
+        window.handleAuth = async () => {
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            if(!email || !pass) return alert("All fields are required.");
+            
+            try {
+                if(isSignUpMode) {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                } else {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                }
+            } catch(e) { alert(e.message); }
+        };
 
-        function initApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-            document.getElementById('user-display').innerText = currentUser;
-            db = JSON.parse(localStorage.getItem(`vault_data_${currentUser.toLowerCase()}`)) || [];
-            renderLibrary();
-        }
+        window.handleLogout = () => signOut(auth);
 
-        // --- SEARCH CORE ---
-        async function searchWord() {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                activeUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.email.split('@')[0];
+                db = JSON.parse(localStorage.getItem(`vault_v2_${user.uid}`)) || [];
+                renderLibrary();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-content').classList.add('hidden');
+            }
+        });
+
+        // --- DICTIONARY ENGINE ---
+        window.searchWord = async () => {
             const word = document.getElementById('word-input').value.trim();
             if(!word) return;
-            
             toggleLoader(true);
             try {
                 const res = await fetch(API_URL + word);
@@ -192,9 +228,9 @@
                 if(data.title) throw "Not Found";
                 currentWordData = data[0];
                 updateSearchUI(currentWordData);
-            } catch(e) { alert("Word not found. Try another spelling."); }
+            } catch(e) { alert("Word not found. Try another."); }
             finally { toggleLoader(false); }
-        }
+        };
 
         function updateSearchUI(data) {
             document.getElementById('search-result').classList.remove('hidden');
@@ -206,7 +242,6 @@
             diffTag.innerText = diff;
             diffTag.className = `text-[10px] font-black uppercase mb-1 tracking-widest difficulty-${diff.toLowerCase()}`;
 
-            // Contextual Meanings & Examples
             const stack = document.getElementById('meanings-stack');
             stack.innerHTML = data.meanings.slice(0, 3).map(m => `
                 <div class="border-l-4 border-slate-100 pl-4">
@@ -216,35 +251,28 @@
                 </div>
             `).join('');
 
-            // Thesaurus Logic
             const synBox = document.getElementById('thesaurus-box');
-            const synList = document.getElementById('synonyms-list');
-            const antList = document.getElementById('antonyms-list');
-            
             const allSyns = [...new Set(data.meanings.flatMap(m => m.synonyms))].slice(0, 10);
             const allAnts = [...new Set(data.meanings.flatMap(m => m.antonyms))].slice(0, 10);
 
             if(allSyns.length || allAnts.length) {
                 synBox.classList.remove('hidden');
-                synList.innerHTML = allSyns.map(s => `<span>#${s}</span>`).join(' ');
-                antList.innerHTML = allAnts.map(a => `<span>#${a}</span>`).join(' ');
+                document.getElementById('synonyms-list').innerHTML = allSyns.map(s => `<span>#${s}</span>`).join(' ');
+                document.getElementById('antonyms-list').innerHTML = allAnts.map(a => `<span>#${a}</span>`).join(' ');
             } else { synBox.classList.add('hidden'); }
 
             const saveBtn = document.getElementById('save-word-btn');
             const exists = db.some(w => w.word.toLowerCase() === data.word.toLowerCase());
             saveBtn.disabled = exists;
-            saveBtn.innerText = exists ? "Already Learned ✅" : "Mark as Learned";
+            saveBtn.innerText = exists ? "Already in Vault ✅" : "Mark as Learned";
             saveBtn.onclick = () => saveWordDeep();
         }
 
-        // --- DATA PERSISTENCE ---
-        function saveWordDeep() {
+        window.saveWordDeep = () => {
             const wordObj = {
                 word: currentWordData.word,
-                phonetic: currentWordData.phonetic || '',
                 difficulty: (currentWordData.word.length < 6) ? 'Easy' : (currentWordData.word.length < 9) ? 'Medium' : 'Hard',
                 date: new Date().getTime(),
-                // Deep save meanings, examples, synonyms, antonyms
                 deepData: currentWordData.meanings.map(m => ({
                     pos: m.partOfSpeech,
                     def: m.definitions[0].definition,
@@ -254,108 +282,72 @@
                 }))
             };
             db.unshift(wordObj);
-            localStorage.setItem(`vault_data_${currentUser.toLowerCase()}`, JSON.stringify(db));
+            localStorage.setItem(`vault_v2_${activeUser.uid}`, JSON.stringify(db));
             renderLibrary();
             document.getElementById('search-result').classList.add('hidden');
             document.getElementById('word-input').value = "";
-        }
+        };
 
-        // --- LIBRARY & PREVIEW ---
-        function renderLibrary() {
+        window.renderLibrary = () => {
             const grid = document.getElementById('library-grid');
             const query = document.getElementById('lib-search').value.toLowerCase();
             const sort = document.getElementById('sort-filter').value;
-            
             let filtered = db.filter(w => w.word.toLowerCase().includes(query));
             if(sort === 'az') filtered.sort((a,b) => a.word.localeCompare(b.word));
             else filtered.sort((a,b) => b.date - a.date);
 
             grid.innerHTML = filtered.map(w => `
                 <div onclick="openPreview(${w.date})" class="word-card bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative group">
-                    <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     <span class="text-[9px] font-black uppercase mb-3 block difficulty-${w.difficulty.toLowerCase()} tracking-widest">${w.difficulty}</span>
                     <h4 class="text-2xl font-black text-slate-900 capitalize mb-1 group-hover:text-indigo-600 transition-colors">${w.word}</h4>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Click for deep review</p>
                 </div>
             `).join('');
             updateDashboard();
-        }
+        };
 
-        function openPreview(ts) {
+        window.openPreview = (ts) => {
             const data = db.find(w => w.date === ts);
             document.getElementById('pv-word').innerText = data.word;
-            document.getElementById('pv-date').innerText = `Unlocked on ${new Date(data.date).toLocaleDateString()}`;
-            
-            const diffTag = document.getElementById('pv-diff');
-            diffTag.innerText = data.difficulty;
-            diffTag.className = `text-[10px] font-black uppercase tracking-widest mb-2 difficulty-${data.difficulty.toLowerCase()}`;
+            document.getElementById('pv-date').innerText = `Archived on ${new Date(data.date).toLocaleDateString()}`;
+            document.getElementById('pv-diff').innerText = data.difficulty;
+            document.getElementById('pv-diff').className = `text-[10px] font-black uppercase tracking-widest mb-2 difficulty-${data.difficulty.toLowerCase()}`;
 
-            const container = document.getElementById('pv-meanings-container');
-            container.innerHTML = data.deepData.map(d => `
-                <div class="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
+            document.getElementById('pv-meanings-container').innerHTML = data.deepData.map(d => `
+                <div class="bg-slate-50 p-8 rounded-[3rem] border border-slate-100">
                     <span class="text-[10px] font-black uppercase text-indigo-500 tracking-widest block mb-4">${d.pos}</span>
-                    <p class="text-2xl font-bold text-slate-800 leading-tight mb-4">${d.def}</p>
-                    ${d.example ? `<div class="bg-white p-4 rounded-2xl border-l-4 border-indigo-400 text-sm text-slate-500 italic mb-6">" ${d.example} "</div>` : ''}
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        ${d.syns.length ? `<div><p class="text-[9px] font-black uppercase text-slate-300 mb-2">Synonyms</p><div class="flex flex-wrap gap-1 text-[10px] font-bold text-indigo-400">${d.syns.slice(0,5).map(s => `<span>#${s}</span>`).join(' ')}</div></div>` : ''}
-                        ${d.ants.length ? `<div><p class="text-[9px] font-black uppercase text-slate-300 mb-2">Antonyms</p><div class="flex flex-wrap gap-1 text-[10px] font-bold text-red-300">${d.ants.slice(0,5).map(a => `<span>#${a}</span>`).join(' ')}</div></div>` : ''}
-                    </div>
+                    <p class="text-2xl font-bold text-slate-800 leading-tight mb-4 underline decoration-indigo-100 underline-offset-8">${d.def}</p>
+                    ${d.example ? `<div class="bg-white p-4 rounded-2xl border-l-4 border-indigo-400 text-sm text-slate-500 italic font-medium">"${d.example}"</div>` : ''}
                 </div>
             `).join('');
-
             document.getElementById('word-preview-modal').classList.add('active');
-        }
+        };
 
-        function closePreview() { document.getElementById('word-preview-modal').classList.remove('active'); }
-
-        // --- DASHBOARD CORE ---
-        function updateDashboard() {
-            document.getElementById('stat-total').innerText = db.length;
-            const now = new Date();
-            const startOfDay = new Date().setHours(0,0,0,0);
-            const startOfWeekly = new Date().setDate(now.getDate() - 7);
-
-            const todayCount = db.filter(w => w.date >= startOfDay).length;
-            const weeklyCount = db.filter(w => w.date >= startOfWeekly).length;
-
-            document.getElementById('stat-weekly').innerText = weeklyCount;
-            document.getElementById('daily-count-text').innerText = todayCount;
-
-            const goal = 5;
-            const percent = Math.min((todayCount / goal) * 100, 100);
-            document.getElementById('goal-progress-bar').style.width = `${percent}%`;
-            document.getElementById('goal-percent').innerText = `${Math.round(percent)}%`;
-        }
-
-        // --- HELPERS ---
-        function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
-        function speakWord(text) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
-        function playResultAudio() { 
-            const link = currentWordData.phonetics.find(p => p.audio)?.audio;
-            link ? new Audio(link).play() : speakWord(currentWordData.word);
-        }
-        function deleteWord(ts) { 
-            if(confirm("Permanently delete this word?")) {
+        window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
+        window.speakWord = (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        window.deleteWord = (ts) => {
+            if(confirm("Delete this word?")) {
                 db = db.filter(w => w.date !== ts);
-                localStorage.setItem(`vault_data_${currentUser.toLowerCase()}`, JSON.stringify(db));
+                localStorage.setItem(`vault_v2_${activeUser.uid}`, JSON.stringify(db));
                 renderLibrary();
             }
-        }
-        function exportToExcel() {
-            const exportData = db.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() }));
-            const ws = XLSX.utils.json_to_sheet(exportData);
+        };
+        window.exportToExcel = () => {
+            const ws = XLSX.utils.json_to_sheet(db.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() })));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "LearnedWords");
+            XLSX.utils.book_append_sheet(wb, ws, "Vault");
             XLSX.writeFile(wb, `${currentUser}_VocabularyVault.xlsx`);
-        }
-        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-
-        window.onload = () => {
-            const saved = localStorage.getItem('word_vault_user');
-            if(saved) { currentUser = saved; initApp(); }
+        };
+        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
+        function updateDashboard() {
+            document.getElementById('stat-total').innerText = db.length;
+            const startOfDay = new Date().setHours(0,0,0,0);
+            const learnedToday = db.filter(w => w.date >= startOfDay).length;
+            document.getElementById('daily-count-text').innerText = learnedToday;
+            const percent = Math.min((learnedToday / 5) * 100, 100);
+            document.getElementById('goal-progress-bar').style.width = `${percent}%`;
+            document.getElementById('goal-percent').innerText = `${Math.round(percent)}%`;
         }
     </script>
 </body>
