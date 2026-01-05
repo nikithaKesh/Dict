@@ -27,19 +27,14 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-indigo-700 flex items-center justify-center p-6">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full transition-all duration-300">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                </div>
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg font-bold text-2xl">V</div>
                 <h2 id="auth-title" class="text-3xl font-black text-slate-900 tracking-tight">Vault Login</h2>
-                <p id="auth-subtitle" class="text-slate-500 text-sm mt-2">Access your CodeNest vocabulary</p>
+                <p id="auth-subtitle" class="text-slate-500 text-sm mt-2">Access your CodeNest Cloud vocabulary</p>
             </div>
-
             <div class="space-y-4">
-                <input id="auth-email" type="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
+                <input id="auth-email" type="email" placeholder="Email" class="w-full p-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
                 <input id="auth-pass" type="password" placeholder="Password" class="w-full p-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition-all">
-                
                 <button onclick="handleAuth()" id="auth-submit-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-800 transition-all shadow-xl active:scale-95">Unlock Vault</button>
-                
                 <p class="text-xs text-center text-slate-400 font-medium">
                     <span id="toggle-msg">New to WordVault?</span>
                     <button onclick="toggleAuthMode()" id="toggle-btn" class="text-indigo-600 font-bold underline ml-1">Create Account</button>
@@ -49,20 +44,22 @@
     </div>
 
     <div id="word-preview-modal" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col overflow-hidden">
-        <nav class="p-6 flex items-center justify-between bg-white/80 backdrop-blur-md border-b sticky top-0 z-10">
+        <nav class="p-6 flex items-center justify-between bg-white border-b">
             <button onclick="closePreview()" class="bg-slate-100 p-3 rounded-full text-slate-600 hover:bg-indigo-600 hover:text-white transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Deep Review</span>
+            <span class="font-black text-slate-400 uppercase text-[10px] tracking-widest">Cloud Review</span>
             <div class="w-12"></div>
         </nav>
         <div class="flex-1 overflow-y-auto p-6 md:p-16 bg-white">
-            <div class="max-w-4xl mx-auto text-center">
-                <div id="pv-diff" class="text-[10px] font-black uppercase tracking-widest mb-2">HARD</div>
-                <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
-                <p id="pv-date" class="text-slate-400 font-medium italic mb-10"></p>
-                <div id="pv-meanings-list" class="space-y-8 text-left max-w-2xl mx-auto"></div>
-                <button onclick="speakWord(document.getElementById('pv-word').innerText)" class="mt-12 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black shadow-2xl active:scale-95">Listen Pronunciation</button>
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <div id="pv-diff" class="text-[10px] font-black uppercase tracking-widest mb-2">HARD</div>
+                    <h1 id="pv-word" class="text-7xl md:text-9xl font-black text-slate-900 capitalize mb-2 tracking-tighter">Word</h1>
+                    <p id="pv-date" class="text-slate-400 font-medium italic mb-6"></p>
+                    <button onclick="speakWord(document.getElementById('pv-word').innerText)" class="bg-indigo-50 text-indigo-600 px-8 py-3 rounded-full font-bold text-sm hover:bg-indigo-100 transition-all">Listen Pronunciation</button>
+                </div>
+                <div id="pv-meanings-container" class="space-y-10"></div>
             </div>
         </div>
     </div>
@@ -78,24 +75,18 @@
         <main class="lg:ml-20 p-6 md:p-12 max-w-6xl mx-auto">
             <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Vocabulary OS</h1>
-                    <p class="text-slate-500 mt-1 italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600 tracking-wide">...</span></p>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Vocabulary Cloud</h1>
+                    <p class="text-slate-500 mt-1 italic italic">Welcome back, <span id="user-display" class="font-bold text-indigo-600 tracking-wide">...</span></p>
                 </div>
-                <div class="flex gap-4">
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
-                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Total Words</span>
-                        <h4 id="stat-total" class="text-2xl font-black">0</h4>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
-                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Goal Focus</span>
-                        <h4 id="stat-weekly" class="text-2xl font-black text-indigo-600">0</h4>
-                    </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-w-[120px] text-center">
+                    <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Cloud Library</span>
+                    <h4 id="stat-total" class="text-2xl font-black">0</h4>
                 </div>
             </header>
 
             <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm mb-12">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-black text-slate-700 uppercase">Today's Progress: <span id="daily-count-text" class="text-indigo-600">0</span>/5 Words</span>
+                    <span class="text-xs font-black text-slate-700 uppercase tracking-widest">Today: <span id="daily-count-text" class="text-indigo-600">0</span>/5 Words</span>
                     <span id="goal-percent" class="text-xs font-black text-indigo-600 tracking-tighter">0%</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -106,9 +97,9 @@
             <div class="relative group max-w-3xl mx-auto mb-16">
                 <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-1000"></div>
                 <div class="relative flex items-center bg-white rounded-2xl shadow-xl p-2 border border-slate-100">
-                    <input id="word-input" type="text" placeholder="Explore a new word..." class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
+                    <input id="word-input" type="text" placeholder="Search and learn..." class="w-full bg-transparent p-4 outline-none text-lg font-bold" onkeypress="if(event.key==='Enter') searchWord()">
                     <div id="search-loader" class="loader mr-4"></div>
-                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Find Word</button>
+                    <button onclick="searchWord()" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-600 transition-all active:scale-95">Search</button>
                 </div>
             </div>
 
@@ -124,17 +115,14 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                         </button>
                     </div>
-
                     <div id="meanings-stack" class="space-y-8 mb-10"></div>
-
-                    <div id="thesaurus-box" class="hidden mb-12 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
+                    <div id="thesaurus-box" class="hidden mb-12 p-6 bg-indigo-50 rounded-3xl border border-indigo-100">
                         <div class="grid grid-cols-2 gap-8">
-                            <div><p class="text-[9px] font-black uppercase text-slate-400 mb-2">Synonyms</p><div id="synonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-indigo-600"></div></div>
+                            <div><p class="text-[9px] font-black uppercase text-indigo-400 mb-2">Synonyms</p><div id="synonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-indigo-600"></div></div>
                             <div><p class="text-[9px] font-black uppercase text-slate-400 mb-2">Antonyms</p><div id="antonyms-list" class="flex flex-wrap gap-1.5 text-[11px] font-bold text-red-500"></div></div>
                         </div>
                     </div>
-
-                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all active:scale-[0.98]">Mark as Learned</button>
+                    <button id="save-word-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-600 shadow-xl transition-all">Save to Cloud Vault</button>
                 </div>
             </section>
 
@@ -142,11 +130,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <h3 class="text-2xl font-black text-slate-900 tracking-tight">Vocabulary Library</h3>
                     <div class="flex flex-1 max-w-md gap-2">
-                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search my words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500 font-medium">
-                        <select id="sort-filter" onchange="renderLibrary()" class="bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none cursor-pointer font-bold text-slate-400">
-                            <option value="newest">Latest</option>
-                            <option value="az">A-Z</option>
-                        </select>
+                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search saved words..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-indigo-500 font-medium">
                     </div>
                 </div>
                 <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -157,11 +141,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyALVLkn_ajWsnEjn3icZRBt3R3NeyxpbnA",
             authDomain: "dict-41d8e.firebaseapp.com",
             projectId: "dict-41d8e",
+            databaseURL: "https://dict-41d8e-default-rtdb.firebaseio.com",
             storageBucket: "dict-41d8e.firebasestorage.app",
             messagingSenderId: "1087434290364",
             appId: "1:1087434290364:web:1884ed7a1cbe93ecfc4cb9",
@@ -170,34 +156,28 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const rtdb = getDatabase(app);
 
-        const API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
-        let db = [];
         let currentWordData = null;
         let isSignUpMode = false;
         let activeUser = null;
+        let cloudDb = []; // Local mirror of cloud data
 
         // --- AUTH SYSTEM ---
         window.toggleAuthMode = () => {
             isSignUpMode = !isSignUpMode;
             document.getElementById('auth-title').innerText = isSignUpMode ? "Create Account" : "Vault Login";
-            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Join the CodeNest community" : "Access your CodeNest vocabulary";
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Start Learning" : "Unlock Vault";
+            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Join Cloud Vault" : "Unlock Vault";
             document.getElementById('toggle-msg').innerText = isSignUpMode ? "Already a member?" : "New to WordVault?";
-            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Login here" : "Create Account";
+            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Login" : "Create Account";
         };
 
         window.handleAuth = async () => {
             const email = document.getElementById('auth-email').value.trim();
             const pass = document.getElementById('auth-pass').value.trim();
-            if(!email || !pass) return alert("All fields are required.");
-            
+            if(!email || !pass) return alert("Fill all fields.");
             try {
-                if(isSignUpMode) {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                } else {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                }
+                isSignUpMode ? await createUserWithEmailAndPassword(auth, email, pass) : await signInWithEmailAndPassword(auth, email, pass);
             } catch(e) { alert(e.message); }
         };
 
@@ -209,8 +189,14 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
-                db = JSON.parse(localStorage.getItem(`vault_v2_${user.uid}`)) || [];
-                renderLibrary();
+                
+                // LISTEN TO REALTIME DB
+                const userRef = ref(rtdb, `users/${user.uid}/words`);
+                onValue(userRef, (snapshot) => {
+                    const data = snapshot.val();
+                    cloudDb = data ? Object.entries(data).map(([key, val]) => ({...val, fbKey: key})) : [];
+                    renderLibrary();
+                });
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-content').classList.add('hidden');
@@ -223,12 +209,12 @@
             if(!word) return;
             toggleLoader(true);
             try {
-                const res = await fetch(API_URL + word);
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 const data = await res.json();
-                if(data.title) throw "Not Found";
+                if(data.title) throw "Error";
                 currentWordData = data[0];
                 updateSearchUI(currentWordData);
-            } catch(e) { alert("Word not found. Try another."); }
+            } catch(e) { alert("Word not found."); }
             finally { toggleLoader(false); }
         };
 
@@ -236,14 +222,11 @@
             document.getElementById('search-result').classList.remove('hidden');
             document.getElementById('result-word').innerText = data.word;
             document.getElementById('result-phonetic').innerText = data.phonetic || '';
-            
-            const diff = (data.word.length < 6) ? 'Easy' : (data.word.length < 9) ? 'Medium' : 'Hard';
-            const diffTag = document.getElementById('result-diff-tag');
-            diffTag.innerText = diff;
-            diffTag.className = `text-[10px] font-black uppercase mb-1 tracking-widest difficulty-${diff.toLowerCase()}`;
+            const diff = data.word.length > 8 ? 'Hard' : data.word.length > 5 ? 'Medium' : 'Easy';
+            document.getElementById('result-diff-tag').innerText = diff;
+            document.getElementById('result-diff-tag').className = `text-[10px] font-black uppercase mb-1 tracking-widest difficulty-${diff.toLowerCase()}`;
 
-            const stack = document.getElementById('meanings-stack');
-            stack.innerHTML = data.meanings.slice(0, 3).map(m => `
+            document.getElementById('meanings-stack').innerHTML = data.meanings.slice(0, 3).map(m => `
                 <div class="border-l-4 border-slate-100 pl-4">
                     <span class="text-[9px] font-black uppercase text-indigo-400 tracking-widest">${m.partOfSpeech}</span>
                     <p class="text-lg text-slate-700 font-bold mb-1 leading-tight">${m.definitions[0].definition}</p>
@@ -251,28 +234,27 @@
                 </div>
             `).join('');
 
-            const synBox = document.getElementById('thesaurus-box');
-            const allSyns = [...new Set(data.meanings.flatMap(m => m.synonyms))].slice(0, 10);
-            const allAnts = [...new Set(data.meanings.flatMap(m => m.antonyms))].slice(0, 10);
-
+            const allSyns = [...new Set(data.meanings.flatMap(m => m.synonyms))].slice(0, 6);
+            const allAnts = [...new Set(data.meanings.flatMap(m => m.antonyms))].slice(0, 6);
             if(allSyns.length || allAnts.length) {
-                synBox.classList.remove('hidden');
+                document.getElementById('thesaurus-box').classList.remove('hidden');
                 document.getElementById('synonyms-list').innerHTML = allSyns.map(s => `<span>#${s}</span>`).join(' ');
                 document.getElementById('antonyms-list').innerHTML = allAnts.map(a => `<span>#${a}</span>`).join(' ');
-            } else { synBox.classList.add('hidden'); }
+            } else { document.getElementById('thesaurus-box').classList.add('hidden'); }
 
             const saveBtn = document.getElementById('save-word-btn');
-            const exists = db.some(w => w.word.toLowerCase() === data.word.toLowerCase());
+            const exists = cloudDb.some(w => w.word.toLowerCase() === data.word.toLowerCase());
             saveBtn.disabled = exists;
-            saveBtn.innerText = exists ? "Already in Vault ✅" : "Mark as Learned";
-            saveBtn.onclick = () => saveWordDeep();
+            saveBtn.innerText = exists ? "Learned ✅" : "Save to Cloud";
+            saveBtn.onclick = () => saveToCloud();
         }
 
-        window.saveWordDeep = () => {
+        window.saveToCloud = () => {
             const wordObj = {
                 word: currentWordData.word,
-                difficulty: (currentWordData.word.length < 6) ? 'Easy' : (currentWordData.word.length < 9) ? 'Medium' : 'Hard',
+                difficulty: currentWordData.word.length > 8 ? 'Hard' : currentWordData.word.length > 5 ? 'Medium' : 'Easy',
                 date: new Date().getTime(),
+                phonetic: currentWordData.phonetic || '',
                 deepData: currentWordData.meanings.map(m => ({
                     pos: m.partOfSpeech,
                     def: m.definitions[0].definition,
@@ -281,9 +263,8 @@
                     ants: m.antonyms || []
                 }))
             };
-            db.unshift(wordObj);
-            localStorage.setItem(`vault_v2_${activeUser.uid}`, JSON.stringify(db));
-            renderLibrary();
+            const userRef = ref(rtdb, `users/${activeUser.uid}/words`);
+            push(userRef, wordObj);
             document.getElementById('search-result').classList.add('hidden');
             document.getElementById('word-input').value = "";
         };
@@ -291,28 +272,25 @@
         window.renderLibrary = () => {
             const grid = document.getElementById('library-grid');
             const query = document.getElementById('lib-search').value.toLowerCase();
-            const sort = document.getElementById('sort-filter').value;
-            let filtered = db.filter(w => w.word.toLowerCase().includes(query));
-            if(sort === 'az') filtered.sort((a,b) => a.word.localeCompare(b.word));
-            else filtered.sort((a,b) => b.date - a.date);
-
+            const filtered = cloudDb.filter(w => w.word.toLowerCase().includes(query)).reverse();
+            document.getElementById('stat-total').innerText = cloudDb.length;
+            
             grid.innerHTML = filtered.map(w => `
-                <div onclick="openPreview(${w.date})" class="word-card bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative group">
-                    <button onclick="event.stopPropagation(); deleteWord(${w.date})" class="absolute top-4 right-4 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative group">
+                    <button onclick="event.stopPropagation(); deleteWord('${w.fbKey}')" class="absolute top-4 right-4 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     <span class="text-[9px] font-black uppercase mb-3 block difficulty-${w.difficulty.toLowerCase()} tracking-widest">${w.difficulty}</span>
                     <h4 class="text-2xl font-black text-slate-900 capitalize mb-1 group-hover:text-indigo-600 transition-colors">${w.word}</h4>
                 </div>
             `).join('');
-            updateDashboard();
+            updateStats();
         };
 
-        window.openPreview = (ts) => {
-            const data = db.find(w => w.date === ts);
+        window.openPreview = (fbKey) => {
+            const data = cloudDb.find(w => w.fbKey === fbKey);
             document.getElementById('pv-word').innerText = data.word;
             document.getElementById('pv-date').innerText = `Archived on ${new Date(data.date).toLocaleDateString()}`;
             document.getElementById('pv-diff').innerText = data.difficulty;
             document.getElementById('pv-diff').className = `text-[10px] font-black uppercase tracking-widest mb-2 difficulty-${data.difficulty.toLowerCase()}`;
-
             document.getElementById('pv-meanings-container').innerHTML = data.deepData.map(d => `
                 <div class="bg-slate-50 p-8 rounded-[3rem] border border-slate-100">
                     <span class="text-[10px] font-black uppercase text-indigo-500 tracking-widest block mb-4">${d.pos}</span>
@@ -324,31 +302,31 @@
         };
 
         window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
-        window.speakWord = (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-        window.deleteWord = (ts) => {
-            if(confirm("Delete this word?")) {
-                db = db.filter(w => w.date !== ts);
-                localStorage.setItem(`vault_v2_${activeUser.uid}`, JSON.stringify(db));
-                renderLibrary();
+        window.deleteWord = (fbKey) => {
+            if(confirm("Delete from Cloud Vault?")) {
+                remove(ref(rtdb, `users/${activeUser.uid}/words/${fbKey}`));
             }
         };
+
         window.exportToExcel = () => {
-            const ws = XLSX.utils.json_to_sheet(db.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() })));
+            const ws = XLSX.utils.json_to_sheet(cloudDb.map(w => ({ Word: w.word, Difficulty: w.difficulty, Date: new Date(w.date).toLocaleDateString() })));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Vault");
-            XLSX.writeFile(wb, `${currentUser}_VocabularyVault.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "CloudVault");
+            XLSX.writeFile(wb, "VocabularyVault.xlsx");
         };
-        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-        function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
-        function updateDashboard() {
-            document.getElementById('stat-total').innerText = db.length;
-            const startOfDay = new Date().setHours(0,0,0,0);
-            const learnedToday = db.filter(w => w.date >= startOfDay).length;
-            document.getElementById('daily-count-text').innerText = learnedToday;
-            const percent = Math.min((learnedToday / 5) * 100, 100);
+
+        function updateStats() {
+            const today = new Date().setHours(0,0,0,0);
+            const countToday = cloudDb.filter(w => w.date >= today).length;
+            document.getElementById('daily-count-text').innerText = countToday;
+            const percent = Math.min((countToday / 5) * 100, 100);
             document.getElementById('goal-progress-bar').style.width = `${percent}%`;
             document.getElementById('goal-percent').innerText = `${Math.round(percent)}%`;
         }
+        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.speakWord = (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        function toggleLoader(show) { document.getElementById('search-loader').style.display = show ? 'block' : 'none'; }
+        window.playResultAudio = () => speakWord(document.getElementById('result-word').innerText);
     </script>
 </body>
 </html>
