@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordVault Pro | SaaS Mastery</title>
+    <title>WordVault Pro | Ultimate Mastery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,8 +13,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: { 50: '#fffbeb', 100: '#fef3c7', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 900: '#78350f' },
-                        obsidian: { 900: '#0c0a09', 800: '#1c1917' }
+                        primary: { 50: '#fffcf0', 100: '#fef3c7', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 900: '#78350f' },
+                        obsidian: { 900: '#020617', 800: '#0f172a' }
                     }
                 }
             }
@@ -24,17 +24,17 @@
         }
     </script>
     <style>
-        body { font-family: 'Outfit', sans-serif; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); -webkit-tap-highlight-color: transparent; }
-        .light body { background-color: #fffefc; color: #451a03; }
-        .dark body { background-color: #0c0a09; color: #fef3c7; }
+        body { font-family: 'Outfit', sans-serif; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); -webkit-tap-highlight-color: transparent; }
+        .light body { background-color: #fffdf5; color: #451a03; }
+        .dark body { background-color: #020617; color: #fef3c7; }
 
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.15); }
-        .dark .glass { background: rgba(28, 25, 23, 0.85); border-color: rgba(245, 158, 11, 0.05); }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .dark .glass { background: rgba(15, 23, 42, 0.8); border-color: rgba(245, 158, 11, 0.1); }
         
-        .word-card { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; border: 2px solid transparent; }
-        .word-card:hover { transform: translateY(-12px) scale(1.03); border-color: #fbbf24; }
+        .word-card { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+        .word-card:hover { transform: translateY(-12px) scale(1.03); }
         
-        #word-preview-modal, #profile-modal { transform: translateY(100%); transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); z-index: 150; }
+        #word-preview-modal, #profile-modal { transform: translateY(100%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); z-index: 150; }
         #word-preview-modal.active, #profile-modal.active { transform: translateY(0); }
 
         .loader { border: 2px solid #fef3c7; border-top: 2px solid #f59e0b; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; }
@@ -42,70 +42,71 @@
 
         #toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 500; transform: translateY(200%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #toast.active { transform: translateY(0); }
+        
+        .premium-shadow { box-shadow: 0 25px 50px -12px rgba(245, 158, 11, 0.15); }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <div id="toast" class="bg-obsidian-900 dark:bg-primary-500 text-white dark:text-obsidian-900 px-8 py-4 rounded-[2rem] shadow-2xl font-bold flex items-center gap-3">
-        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
-        <span id="toast-msg">Word Saved to Cloud</span>
+    <div id="toast" class="bg-stone-900 dark:bg-primary-500 text-white dark:text-stone-950 px-10 py-5 rounded-[2.5rem] shadow-2xl font-black flex items-center gap-4">
+        <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span id="toast-msg">Vault Synchronized</span>
     </div>
 
     <div id="login-screen" class="fixed inset-0 z-[200] bg-primary-500 flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-obsidian-900 p-10 md:p-14 rounded-[4rem] shadow-2xl max-w-md w-full border-[6px] border-primary-100 dark:border-stone-800">
+        <div class="bg-white dark:bg-obsidian-800 p-12 md:p-16 rounded-[4.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] max-w-md w-full border-[8px] border-primary-100 dark:border-stone-800">
             <div class="text-center mb-12">
-                <div class="w-24 h-24 bg-primary-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary-500/50">
+                <div class="w-24 h-24 bg-primary-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary-500/40">
                     <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 </div>
-                <h2 id="auth-title" class="text-5xl font-black tracking-tighter text-stone-900 dark:text-white leading-none">WordVault.</h2>
-                <p id="auth-subtitle" class="text-primary-600 dark:text-primary-400 font-bold mt-3 uppercase text-[10px] tracking-[0.3em]">Premium Intelligence</p>
+                <h2 id="auth-title" class="text-5xl font-black tracking-tighter text-stone-950 dark:text-white">WordVault.</h2>
+                <p id="auth-subtitle" class="text-primary-600 dark:text-primary-400 font-bold mt-4 uppercase text-[10px] tracking-[0.4em]">Establish Your Identity</p>
             </div>
             
             <div class="space-y-4">
-                <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-4 bg-primary-50 dark:bg-stone-800 py-5 rounded-[2rem] font-black hover:bg-primary-100 transition-all active:scale-95">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-6 h-6" alt="Google">
-                    Sign in with Google
+                <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-4 bg-primary-50 dark:bg-stone-800 py-6 rounded-[2rem] font-black hover:bg-primary-100 transition-all active:scale-95">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-6 h-6">
+                    Sign with Google
                 </button>
-                <div class="flex items-center gap-4 py-4 text-primary-200 uppercase text-[9px] font-black tracking-widest"><div class="h-px bg-primary-100 flex-1"></div>OR EMAIL<div class="h-px bg-primary-100 flex-1"></div></div>
-                <input id="auth-email" type="email" placeholder="Email" class="w-full p-5 rounded-[2rem] border-2 border-primary-50 dark:bg-stone-800 dark:border-stone-700 outline-none focus:border-primary-500 font-bold transition-all">
-                <input id="auth-pass" type="password" placeholder="Password" class="w-full p-5 rounded-[2rem] border-2 border-primary-50 dark:bg-stone-800 dark:border-stone-700 outline-none focus:border-primary-500 font-bold transition-all">
-                <button onclick="handleAuth()" id="auth-main-btn" class="w-full bg-primary-500 text-white py-6 rounded-[2.5rem] font-black text-xl shadow-2xl hover:bg-primary-600 active:scale-95 transition-all">Start Mastering</button>
-                <button onclick="toggleAuthMode()" id="toggle-btn" class="w-full text-center text-[10px] font-black text-primary-400 uppercase tracking-widest mt-4">Create Account Instead</button>
+                <div class="flex items-center gap-4 py-4"><div class="h-px bg-primary-100 flex-1"></div><span class="text-[9px] font-black text-primary-300 uppercase">Or Encryption Key</span><div class="h-px bg-primary-100 flex-1"></div></div>
+                <input id="auth-email" type="email" placeholder="Email" class="w-full p-5 rounded-[2rem] border-2 border-primary-50 dark:bg-stone-800 dark:border-stone-700 outline-none focus:border-primary-500 font-black">
+                <input id="auth-pass" type="password" placeholder="Key" class="w-full p-5 rounded-[2rem] border-2 border-primary-50 dark:bg-stone-800 dark:border-stone-700 outline-none focus:border-primary-500 font-black">
+                <button onclick="handleAuth()" id="auth-main-btn" class="w-full bg-primary-500 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl hover:bg-primary-600 transition-all">Unlock Library</button>
+                <button onclick="toggleAuthMode()" id="toggle-btn" class="w-full text-center text-[10px] font-black text-primary-400 uppercase tracking-widest mt-6 hover:text-primary-600 transition-colors">Request New ID</button>
             </div>
         </div>
     </div>
 
     <div id="profile-modal" class="fixed inset-0 bg-primary-50 dark:bg-obsidian-900 flex flex-col">
-        <nav class="p-8 flex items-center justify-between">
-            <button onclick="closeProfile()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-xl text-primary-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <h3 class="font-black text-xs uppercase tracking-[0.4em] text-primary-900 dark:text-primary-400">The Architect</h3>
-            <button onclick="saveProfileChanges()" id="profile-save-btn" class="bg-primary-500 text-white px-8 py-3 rounded-full font-black text-xs uppercase hidden shadow-lg">Save Changes</button>
+        <nav class="p-8 flex items-center justify-between border-b dark:border-stone-800 bg-white dark:bg-obsidian-900">
+            <button onclick="closeProfile()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-2xl text-primary-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="font-black text-xs uppercase tracking-[0.5em] text-primary-900 dark:text-primary-400 ml-4">License Holder</span>
+            <button onclick="saveProfileChanges()" id="profile-save-btn" class="bg-primary-500 text-white px-10 py-4 rounded-full font-black text-xs uppercase hidden shadow-2xl">Push Updates</button>
             <div id="profile-edit-trigger">
-                <button onclick="enableProfileEdit()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-xl text-primary-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                <button onclick="enableProfileEdit()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-2xl text-primary-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
             </div>
         </nav>
-        <div class="flex-1 overflow-y-auto p-10 md:p-24 text-center">
-            <div class="max-w-xl mx-auto">
-                <div class="relative inline-block mb-12 group pfp-upload-hover">
-                    <img id="user-pfp-large" src="" class="w-48 h-48 rounded-[4rem] border-[10px] border-white dark:border-stone-800 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] object-cover hidden">
-                    <div id="user-avatar-placeholder" class="w-48 h-48 rounded-[4rem] bg-primary-500 text-white flex items-center justify-center text-8xl font-black shadow-2xl">?</div>
-                    <label class="upload-overlay absolute inset-0 bg-obsidian-900/60 rounded-[4rem] flex flex-col items-center justify-center text-white opacity-0 transition-opacity cursor-pointer">
-                        <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        <span class="text-[10px] font-black uppercase tracking-widest">Update</span>
+        <div class="flex-1 overflow-y-auto p-12 md:p-32">
+            <div class="max-w-xl mx-auto text-center">
+                <div class="relative inline-block mb-16 group pfp-upload-hover">
+                    <img id="user-pfp-large" src="" class="w-56 h-56 rounded-[5rem] border-[12px] border-white dark:border-stone-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] object-cover hidden">
+                    <div id="user-avatar-placeholder" class="w-56 h-56 rounded-[5rem] bg-primary-500 text-white flex items-center justify-center text-[100px] font-black shadow-2xl">?</div>
+                    <label class="absolute inset-0 bg-stone-950/70 rounded-[5rem] flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <input type="file" id="pfp-input" accept="image/*" class="hidden" onchange="handlePfpUpload(event)">
                     </label>
                 </div>
-                <input id="edit-display-name" type="text" readonly class="text-6xl font-black bg-transparent text-center outline-none border-b-4 border-transparent w-full mb-4 dark:text-white tracking-tighter" value="...">
-                <input id="edit-bio" type="text" readonly placeholder="Mastery Goal..." class="text-primary-600 dark:text-primary-400 bg-transparent text-center outline-none w-full italic font-semibold text-xl" value="">
+                <input id="edit-display-name" type="text" readonly class="text-[5rem] font-black bg-transparent text-center outline-none w-full mb-4 dark:text-white tracking-tighter leading-none" value="...">
+                <input id="edit-bio" type="text" readonly placeholder="What's the mission?" class="text-primary-600 dark:text-primary-400 bg-transparent text-center outline-none w-full italic font-bold text-2xl" value="">
                 
-                <div class="grid grid-cols-2 gap-8 mt-20">
-                    <div class="bg-white dark:bg-stone-900 p-10 rounded-[3.5rem] shadow-sm border border-primary-50 dark:border-stone-800">
-                        <p class="text-[10px] font-black uppercase text-primary-300 mb-2 tracking-[0.3em]">Consistency</p>
-                        <p class="text-5xl font-black text-stone-900 dark:text-white">🔥 <span id="profile-streak">0</span></p>
+                <div class="grid grid-cols-2 gap-10 mt-24">
+                    <div class="bg-white dark:bg-stone-900 p-12 rounded-[4rem] shadow-sm border border-primary-100 dark:border-stone-800">
+                        <p class="text-[11px] font-black uppercase text-primary-300 mb-2 tracking-[0.5em]">Persistence</p>
+                        <p class="text-6xl font-black text-stone-950 dark:text-white">🔥 <span id="profile-streak">0</span></p>
                     </div>
-                    <div class="bg-white dark:bg-stone-900 p-10 rounded-[3.5rem] shadow-sm border border-primary-50 dark:border-stone-800">
-                        <p class="text-[10px] font-black uppercase text-primary-300 mb-2 tracking-[0.3em]">Knowledge</p>
-                        <p class="text-5xl font-black text-emerald-500"><span id="profile-rate">0</span>%</p>
+                    <div class="bg-white dark:bg-stone-900 p-12 rounded-[4rem] shadow-sm border border-primary-100 dark:border-stone-800">
+                        <p class="text-[11px] font-black uppercase text-primary-300 mb-2 tracking-[0.5em]">Retained</p>
+                        <p class="text-6xl font-black text-emerald-500"><span id="profile-rate">0</span>%</p>
                     </div>
                 </div>
             </div>
@@ -113,95 +114,95 @@
     </div>
 
     <div id="word-preview-modal" class="fixed inset-0 bg-primary-50 dark:bg-obsidian-900 flex flex-col overflow-hidden">
-        <nav class="p-8 flex items-center justify-between border-b border-primary-100 dark:border-stone-800 bg-white/50 dark:bg-obsidian-900/50 backdrop-blur-xl">
-            <button onclick="closePreview()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-lg text-primary-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M15 19l-7-7 7-7"/></svg></button>
+        <nav class="p-8 flex items-center justify-between border-b border-primary-100 dark:border-stone-800 bg-white/50 dark:bg-obsidian-900/50 backdrop-blur-2xl">
+            <button onclick="closePreview()" class="p-4 bg-white dark:bg-stone-800 rounded-full shadow-2xl text-primary-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M15 19l-7-7 7-7"/></svg></button>
             <div class="flex gap-4">
-                <button onclick="navigatePreview(-1)" class="p-4 bg-primary-100 dark:bg-stone-800 text-primary-700 dark:text-primary-400 rounded-3xl active:scale-90 transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-                <button onclick="navigatePreview(1)" class="p-4 bg-primary-100 dark:bg-stone-800 text-primary-700 dark:text-primary-400 rounded-3xl active:scale-90 transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+                <button onclick="navigatePreview(-1)" class="p-5 bg-primary-100 dark:bg-stone-800 text-primary-700 rounded-[2rem] active:scale-90 transition-all"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+                <button onclick="navigatePreview(1)" class="p-5 bg-primary-100 dark:bg-stone-800 text-primary-700 rounded-[2rem] active:scale-90 transition-all"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
             </div>
-            <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[10px] font-black uppercase px-10 py-4 rounded-full bg-primary-500 text-white shadow-2xl active:scale-95 transition-all">Mark Known</button>
+            <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[10px] font-black uppercase px-12 py-5 rounded-full bg-primary-500 text-white shadow-2xl active:scale-95 transition-all">Verify Mastery</button>
         </nav>
         <div class="flex-1 overflow-y-auto p-12 md:p-32 text-center">
-            <p id="pv-tag" class="text-xs font-black uppercase text-primary-400 tracking-[0.5em] mb-6">CATEGORY</p>
-            <h1 id="pv-word" class="text-[10rem] md:text-[14rem] font-black text-stone-900 dark:text-white capitalize mb-10 tracking-tighter leading-[0.8] animate-in zoom-in-75 duration-700">Word</h1>
-            <div id="pv-meanings-container" class="max-w-4xl mx-auto space-y-12 text-left mt-24"></div>
+            <p id="pv-tag" class="text-xs font-black uppercase text-primary-400 tracking-[0.6em] mb-10">ARCHIVE DATA</p>
+            <h1 id="pv-word" class="text-[12rem] md:text-[16rem] font-black text-stone-950 dark:text-white capitalize mb-12 tracking-tighter leading-[0.75]">Word</h1>
+            <div id="pv-meanings-container" class="max-w-5xl mx-auto space-y-12 text-left mt-32"></div>
         </div>
     </div>
 
     <div id="app-content" class="hidden">
-        <nav class="fixed bottom-10 left-1/2 -translate-x-1/2 lg:left-12 lg:translate-x-0 lg:top-1/2 lg:-translate-y-1/2 w-[85%] lg:w-28 bg-white/90 dark:bg-obsidian-900/95 backdrop-blur-2xl border-[3px] border-primary-100 dark:border-stone-800 z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-12 p-6 rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(245,158,11,0.2)]">
-            <button onclick="toggleDarkMode()" class="p-4 text-primary-400 hover:text-primary-600 transition-transform hover:scale-125"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button>
-            <button onclick="exportToExcel()" class="p-4 text-primary-400 hover:text-emerald-500 transition-transform hover:scale-125"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
-            <button onclick="openProfile()" class="w-16 h-16 rounded-[2rem] border-[3px] border-primary-500 overflow-hidden hover:scale-110 active:scale-90 transition-all flex items-center justify-center bg-primary-500 text-white font-black text-xl shadow-2xl">
+        <nav class="fixed bottom-12 left-1/2 -translate-x-1/2 lg:left-16 lg:translate-x-0 lg:top-1/2 lg:-translate-y-1/2 w-[85%] lg:w-32 bg-white/95 dark:bg-obsidian-900/95 backdrop-blur-3xl border-[4px] border-primary-50 dark:border-stone-800 z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-14 p-8 rounded-[5rem] shadow-[0_50px_100px_-20px_rgba(245,158,11,0.25)]">
+            <button onclick="toggleDarkMode()" class="p-4 text-primary-400 hover:text-primary-600 transition-all hover:rotate-12"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button>
+            <button onclick="exportToExcel()" class="p-4 text-primary-400 hover:text-emerald-500 transition-all"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
+            <button onclick="openProfile()" class="w-20 h-20 rounded-[2.5rem] border-[4px] border-primary-500 overflow-hidden hover:scale-110 active:scale-90 transition-all flex items-center justify-center bg-primary-500 text-white font-black text-2xl shadow-2xl">
                 <img id="user-pfp-sidebar" src="" class="hidden w-full h-full object-cover">
                 <span id="user-avatar-sidebar">?</span>
             </button>
-            <button onclick="handleLogout()" class="p-4 text-primary-300 hover:text-red-500 transition-transform hover:scale-125"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            <button onclick="handleLogout()" class="p-4 text-primary-300 hover:text-red-500 transition-all"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
         </nav>
 
-        <main class="lg:ml-52 p-8 md:p-20 max-w-[1400px] mx-auto">
-            <header class="mb-20 flex flex-col xl:flex-row xl:items-end justify-between gap-12">
-                <div class="animate-in slide-in-from-left duration-700">
-                    <p id="user-display" class="text-primary-600 font-black tracking-[0.4em] uppercase text-[12px] mb-4">Establishing Uplink...</p>
-                    <h1 class="text-9xl font-black tracking-tighter dark:text-white leading-[0.8]">Archive.</h1>
+        <main class="lg:ml-64 p-10 md:p-24 max-w-[1600px] mx-auto">
+            <header class="mb-32 flex flex-col 2xl:flex-row 2xl:items-end justify-between gap-16">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-4 h-4 rounded-full bg-emerald-500 animate-ping"></div>
+                        <p id="user-display" class="text-primary-600 font-black tracking-[0.5em] uppercase text-[14px]">Link Active</p>
+                    </div>
+                    <h1 class="text-[10rem] font-black tracking-tighter dark:text-white leading-[0.75] mb-6">Archive.</h1>
                 </div>
-                <div class="bg-white dark:bg-obsidian-800 p-10 rounded-[4.5rem] min-w-[400px] shadow-2xl border-4 border-primary-100 dark:border-stone-800 relative overflow-hidden group transition-all hover:border-primary-500">
+                <div class="bg-white dark:bg-stone-900 p-12 rounded-[5rem] min-w-[450px] shadow-2xl border-[6px] border-primary-50 dark:border-stone-800 relative overflow-hidden group">
                     <div class="relative z-10 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-10">
+                        <div class="flex justify-between items-start mb-12">
                             <div>
-                                <p class="text-[10px] font-black uppercase text-primary-400 tracking-widest mb-2 text-white/50">Mastery Progress</p>
-                                <h4 class="text-6xl font-black dark:text-white tracking-tighter"><span id="daily-count-text">0</span> / 5</h4>
-                            </div>
-                            <div class="w-14 h-14 bg-primary-500 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <p class="text-[11px] font-black uppercase text-primary-300 mb-3 tracking-widest">Mastery Engine</p>
+                                <h4 class="text-7xl font-black dark:text-white tracking-tighter"><span id="daily-count-text">0</span> / 5</h4>
                             </div>
                         </div>
-                        <div class="w-full bg-primary-100 dark:bg-stone-700 h-3 rounded-full overflow-hidden">
-                            <div id="goal-progress-bar" class="progress-fill bg-primary-500 h-full w-0 shadow-[0_0_20px_rgba(245,158,11,0.6)]"></div>
+                        <div class="w-full bg-primary-100 dark:bg-stone-800 h-4 rounded-full overflow-hidden shadow-inner">
+                            <div id="goal-progress-bar" class="progress-fill bg-primary-500 h-full w-0 shadow-[0_0_30px_rgba(245,158,11,0.8)]"></div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div class="relative group max-w-5xl mx-auto mb-32 animate-in fade-in zoom-in duration-1000 delay-200">
-                <div class="relative flex flex-col bg-white dark:bg-obsidian-900 rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] p-5 border-2 border-primary-50 dark:border-stone-800 transition-all focus-within:border-primary-500 focus-within:ring-[20px] focus-within:ring-primary-500/5">
-                    <div class="flex items-center p-2">
-                        <input id="word-input" type="text" placeholder="Type word... (⌘+K)" class="w-full bg-transparent p-6 outline-none text-4xl font-bold dark:text-white tracking-tighter" onkeypress="if(event.key==='Enter') searchWord()">
-                        <div id="search-loader" class="loader mr-8"></div>
-                        <button onclick="searchWord()" class="bg-primary-500 text-white px-16 py-7 rounded-[3rem] font-black text-2xl hover:bg-primary-600 transition-all shadow-2xl active:scale-95">Master</button>
+            <div class="max-w-6xl mx-auto mb-40">
+                <div class="flex flex-col bg-white dark:bg-stone-900 rounded-[4.5rem] shadow-[0_60px_100px_-20px_rgba(0,0,0,0.15)] p-6 border-2 border-primary-50 dark:border-stone-800 focus-within:border-primary-500 focus-within:ring-[30px] focus-within:ring-primary-500/5 transition-all">
+                    <div class="flex items-center p-3">
+                        <input id="word-input" type="text" placeholder="Sync new word... (⌘+K)" class="w-full bg-transparent p-8 outline-none text-5xl font-black dark:text-white tracking-tighter" onkeypress="if(event.key==='Enter') searchWord()">
+                        <div id="search-loader" class="loader mr-10 scale-150"></div>
+                        <button onclick="searchWord()" class="bg-primary-500 text-white px-20 py-8 rounded-[3.5rem] font-black text-3xl shadow-2xl hover:bg-primary-600 transition-all active:scale-90">Master</button>
                     </div>
-                    <div class="flex items-center gap-6 px-12 pb-6 border-t border-primary-50 dark:border-stone-800 pt-6 mt-4">
-                        <span class="text-[11px] font-black text-primary-300 uppercase tracking-widest">Assign to Data Folder:</span>
-                        <select id="tag-selector" class="bg-primary-50 dark:bg-stone-800 text-sm font-black px-8 py-3 rounded-3xl outline-none dark:text-primary-100 cursor-pointer hover:bg-primary-500 hover:text-white transition-all">
-                            <option value="General">General</option>
-                            <option value="GRE Prep">GRE Exam</option>
-                            <option value="Tech">Technical</option>
-                            <option value="Personal">Personal</option>
+                    <div class="flex items-center gap-8 px-14 pb-8 border-t border-primary-50 dark:border-stone-800 pt-8 mt-6">
+                        <span class="text-xs font-black text-primary-200 uppercase tracking-[0.3em]">Destination:</span>
+                        <select id="tag-selector" class="bg-primary-50 dark:bg-stone-800 text-sm font-black px-10 py-4 rounded-[2rem] outline-none dark:text-primary-100 cursor-pointer hover:bg-primary-500 hover:text-white transition-all">
+                            <option value="General">General Archive</option>
+                            <option value="GRE Prep">GRE Examination</option>
+                            <option value="Tech">Technical Manual</option>
+                            <option value="Personal">Personal Identity</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <section id="search-result" class="hidden max-w-5xl mx-auto mb-32 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                <div class="bg-white dark:bg-obsidian-900 p-16 md:p-24 rounded-[5rem] shadow-2xl border-2 border-primary-500/20 relative">
+            <section id="search-result" class="hidden max-w-6xl mx-auto mb-40 animate-in fade-in slide-in-from-bottom-20 duration-1000">
+                <div class="bg-white dark:bg-stone-900 p-20 md:p-32 rounded-[6rem] shadow-2xl border-[10px] border-primary-500/5 relative">
                     <div id="result-content"></div>
-                    <button onclick="saveToCloud()" id="save-word-btn" class="w-full mt-20 bg-obsidian-900 dark:bg-primary-500 text-white py-8 rounded-[3rem] font-black text-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl">Sync Word to Cloud Library</button>
+                    <button onclick="saveToCloud()" id="save-word-btn" class="w-full mt-24 bg-stone-950 dark:bg-primary-500 text-white py-10 rounded-[3.5rem] font-black text-3xl shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all">Archive Data to Cloud Vault</button>
                 </div>
             </section>
 
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-10">
-                <h3 class="text-6xl font-black tracking-tighter dark:text-white">Vault <span id="stat-total" class="text-lg font-black text-primary-500 ml-4 opacity-50 uppercase tracking-widest">0</span></h3>
-                <div class="flex items-center gap-5 w-full md:w-auto">
-                    <select id="lib-filter-tag" onchange="renderLibrary()" class="bg-white dark:bg-obsidian-900 border-2 border-primary-50 dark:border-stone-800 p-6 rounded-[2.5rem] text-sm font-black outline-none shadow-sm">
-                        <option value="All">Filter by Category</option>
-                        <option value="GRE Prep">GRE Exam</option>
-                        <option value="Tech">Technical</option>
-                        <option value="General">General</option>
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-20 gap-12">
+                <h3 class="text-7xl font-black tracking-tighter dark:text-white">Vault. <span id="stat-total" class="text-2xl font-black text-primary-500 ml-6 opacity-30 uppercase">0 DATA</span></h3>
+                <div class="flex items-center gap-6 w-full md:w-auto">
+                    <select id="lib-filter-tag" onchange="renderLibrary()" class="bg-white dark:bg-stone-900 border-4 border-primary-50 dark:border-stone-800 p-8 rounded-[3rem] text-sm font-black outline-none shadow-sm">
+                        <option value="All">All Categories</option>
+                        <option value="GRE Prep">GRE Examination</option>
+                        <option value="Tech">Technical Manual</option>
+                        <option value="General">General Archive</option>
                     </select>
-                    <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search data..." class="flex-1 md:w-80 bg-white dark:bg-obsidian-900 border-2 border-primary-50 dark:border-stone-800 p-6 rounded-[2.5rem] text-sm font-bold outline-none focus:border-primary-500 shadow-inner">
+                    <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Search Vault..." class="flex-1 md:w-96 bg-white dark:bg-stone-900 border-4 border-primary-50 dark:border-stone-800 p-8 rounded-[3rem] text-sm font-black outline-none focus:border-primary-500 shadow-inner">
                 </div>
             </div>
-            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12"></div>
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16"></div>
         </main>
     </div>
 
@@ -232,12 +233,13 @@
         let cloudDb = [];
         let currentPreviewIndex = 0;
 
-        // --- AUTH & DYNAMIC SYNC ---
+        // --- AUTH & DATA SYNC ---
         window.toggleAuthMode = () => {
             isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-title').innerText = isSignUpMode ? "Register." : "Vault Login.";
-            document.getElementById('auth-main-btn').innerText = isSignUpMode ? "Create Account" : "Access Vault";
-            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Back to Login" : "New? Create Identity";
+            document.getElementById('auth-title').innerText = isSignUpMode ? "Identity." : "Vault.";
+            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Generate Cloud License" : "Premium Intelligence Access";
+            document.getElementById('auth-main-btn').innerText = isSignUpMode ? "Register ID" : "Unlock";
+            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Login" : "New ID";
         };
 
         window.handleAuth = async () => {
@@ -248,9 +250,7 @@
             } catch(e) { alert(e.message); }
         };
 
-        window.loginWithGoogle = async () => {
-            try { await signInWithPopup(auth, googleProvider); } catch(e) { alert(e.message); }
-        };
+        window.loginWithGoogle = async () => { try { await signInWithPopup(auth, googleProvider); } catch(e) { alert(e.message); } };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -258,12 +258,13 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
                 
-                // Reactive listeners for Profile & Words
                 onValue(ref(rtdb, `users/${user.uid}/profile`), (snap) => applyProfile(snap.val(), user));
+                
+                // ROOT SOURCE OF TRUTH LISTENER
                 onValue(ref(rtdb, `users/${user.uid}/words`), (snap) => {
                     const d = snap.val();
                     cloudDb = d ? Object.entries(d).map(([k, v]) => ({...v, fbKey: k})) : [];
-                    renderLibrary();
+                    renderLibrary(); // This now forces the library to update immediately on any cloud change
                 });
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -271,38 +272,32 @@
             }
         });
 
-        // --- PROFILE PIC & METADATA ---
+        // --- PFP & PROFILE ---
         function applyProfile(p, user) {
             const name = p?.displayName || user.displayName || user.email.split('@')[0];
             document.getElementById('edit-display-name').value = name;
-            document.getElementById('user-display').innerText = `Licensed to ${name}`;
-            
+            document.getElementById('user-display').innerText = `Active Link: ${name}`;
             const photo = p?.photoBase64 || user.photoURL;
             if(photo) {
-                const sidebarImg = document.getElementById('user-pfp-sidebar');
-                const largeImg = document.getElementById('user-pfp-large');
-                sidebarImg.src = photo; sidebarImg.classList.remove('hidden');
-                largeImg.src = photo; largeImg.classList.remove('hidden');
+                document.getElementById('user-pfp-sidebar').src = photo; document.getElementById('user-pfp-sidebar').classList.remove('hidden');
+                document.getElementById('user-pfp-large').src = photo; document.getElementById('user-pfp-large').classList.remove('hidden');
                 document.getElementById('user-avatar-sidebar').classList.add('hidden');
                 document.getElementById('user-avatar-placeholder').classList.add('hidden');
             }
         }
 
         window.handlePfpUpload = (e) => {
-            const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = async (evt) => {
                 await update(ref(rtdb, `users/${activeUser.uid}/profile`), { photoBase64: evt.target.result });
-                showToast("Identity Photo Updated");
+                showToast("Identity Image Synchronized");
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(e.target.files[0]);
         };
 
         window.enableProfileEdit = () => {
-            const dn = document.getElementById('edit-display-name');
-            const bio = document.getElementById('edit-bio');
-            dn.readOnly = false; bio.readOnly = false;
-            dn.focus();
+            document.getElementById('edit-display-name').readOnly = false;
+            document.getElementById('edit-bio').readOnly = false;
             document.getElementById('profile-save-btn').classList.remove('hidden');
             document.getElementById('profile-edit-trigger').classList.add('hidden');
         };
@@ -316,10 +311,10 @@
             document.getElementById('edit-bio').readOnly = true;
             document.getElementById('profile-save-btn').classList.add('hidden');
             document.getElementById('profile-edit-trigger').classList.remove('hidden');
-            showToast("Profile Synchronized");
+            showToast("Profile Updated");
         };
 
-        // --- CORE LOGIC (CLOUD FIX) ---
+        // --- DICTIONARY ENGINE ---
         window.searchWord = async () => {
             const word = document.getElementById('word-input').value.trim();
             if(!word) return;
@@ -328,36 +323,35 @@
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 const data = await res.json();
                 currentWordData = data[0];
-                updateSearchUI(currentWordData);
-            } catch(e) { showToast("Source node unresponsive", "error"); }
+                renderSearchUI(currentWordData);
+            } catch(e) { showToast("Data node offline", "error"); }
             finally { toggleLoader(false); }
         };
 
-        function updateSearchUI(data) {
+        function renderSearchUI(data) {
             document.getElementById('search-result').classList.remove('hidden');
             document.getElementById('result-content').innerHTML = `
-                <div class="mb-12">
-                    <p class="text-primary-600 font-black uppercase text-xs tracking-[0.5em] mb-4">${data.meanings[0].partOfSpeech}</p>
-                    <h2 class="text-9xl font-black tracking-tighter dark:text-white capitalize leading-none">${data.word}</h2>
-                    <p class="text-primary-400 font-bold italic mt-6 text-3xl">/ ${data.phonetic || ''} /</p>
+                <div class="mb-16">
+                    <p class="text-primary-600 font-black uppercase text-xl tracking-[0.6em] mb-4">${data.meanings[0].partOfSpeech}</p>
+                    <h2 class="text-[10rem] font-black tracking-tighter dark:text-white capitalize leading-none">${data.word}</h2>
+                    <p class="text-primary-300 font-bold italic mt-8 text-4xl">/ ${data.phonetic || ''} /</p>
                 </div>
-                <div class="space-y-8">
+                <div class="space-y-10">
                     ${data.meanings.slice(0, 3).map(m => `
-                        <div class="bg-primary-50/20 dark:bg-stone-800/40 p-10 rounded-[3.5rem] border-2 border-primary-50 dark:border-stone-800">
-                            <p class="text-2xl font-bold leading-tight dark:text-stone-200">${m.definitions[0].definition}</p>
+                        <div class="bg-primary-50/10 dark:bg-stone-800/40 p-12 rounded-[4.5rem] border-4 border-primary-50 dark:border-stone-800">
+                            <p class="text-3xl font-bold leading-tight dark:text-stone-100">${m.definitions[0].definition}</p>
                         </div>
                     `).join('')}
                 </div>
             `;
             const saveBtn = document.getElementById('save-word-btn');
             saveBtn.disabled = cloudDb.some(w => w.word.toLowerCase() === data.word.toLowerCase());
-            saveBtn.innerText = saveBtn.disabled ? "Analyzed ✓" : "Archive Data to Cloud Vault";
+            saveBtn.innerText = saveBtn.disabled ? "Word Data Present ✓" : "Archive Data to Cloud Library";
         }
 
         window.saveToCloud = () => {
             const wordObj = {
                 word: currentWordData.word,
-                difficulty: currentWordData.word.length > 8 ? 'Hard' : 'Medium',
                 date: new Date().getTime(),
                 mastered: false,
                 tag: document.getElementById('tag-selector').value,
@@ -370,7 +364,7 @@
             push(ref(rtdb, `users/${activeUser.uid}/words`), wordObj);
             document.getElementById('search-result').classList.add('hidden');
             document.getElementById('word-input').value = "";
-            showToast("Sync Successful", "success");
+            showToast("Sync Successful");
         };
 
         window.renderLibrary = () => {
@@ -382,26 +376,26 @@
                 return matchQ && matchF;
             }).reverse();
             
-            document.getElementById('stat-total').innerText = `${cloudDb.length} Items`;
+            document.getElementById('stat-total').innerText = `${cloudDb.length} DATA`;
             document.getElementById('library-grid').innerHTML = filtered.map(w => `
-                <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white dark:bg-obsidian-900 p-10 rounded-[4.5rem] border-2 border-primary-50 dark:border-stone-800 relative ${w.mastered ? 'ring-4 ring-primary-500 bg-primary-50/10' : 'shadow-xl shadow-primary-500/5'}">
-                    <div class="flex justify-between items-start mb-10">
-                        <span class="text-[10px] font-black uppercase text-primary-600 bg-primary-50 dark:bg-stone-800 px-4 py-2 rounded-2xl">${w.tag || 'General'}</span>
-                        <button onclick="event.stopPropagation(); deleteWord('${w.fbKey}')" class="p-3 text-primary-100 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white dark:bg-obsidian-800 p-12 rounded-[5rem] border-4 border-primary-50 dark:border-stone-800 relative ${w.mastered ? 'border-primary-500 bg-primary-50/20 ring-8 ring-primary-500/5' : 'shadow-2xl shadow-primary-500/5'}">
+                    <div class="flex justify-between items-start mb-12">
+                        <span class="text-[11px] font-black uppercase text-primary-600 bg-primary-50 dark:bg-stone-900 px-5 py-2 rounded-2xl">${w.tag || 'General'}</span>
+                        <button onclick="event.stopPropagation(); deleteWord('${w.fbKey}')" class="p-4 text-primary-100 hover:text-red-500 transition-all"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
                     </div>
-                    <h4 class="text-5xl font-black dark:text-white capitalize tracking-tighter leading-none">${w.word}</h4>
-                    <div class="mt-8 flex items-center gap-3">
-                        <div class="h-1 flex-1 bg-primary-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-primary-500" style="width: ${w.mastered ? '100%' : '20%'}"></div>
+                    <h4 class="text-6xl font-black dark:text-white capitalize tracking-tighter leading-none">${w.word}</h4>
+                    <div class="mt-12 flex items-center gap-4">
+                        <div class="h-1.5 flex-1 bg-primary-50 dark:bg-stone-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" style="width: ${w.mastered ? '100%' : '30%'}"></div>
                         </div>
-                        <span class="text-[9px] font-black text-primary-300 uppercase">${w.mastered ? 'Mastered' : 'Learning'}</span>
+                        <span class="text-[10px] font-black text-primary-300 uppercase">${w.mastered ? 'MASTERED' : 'LEARNING'}</span>
                     </div>
                 </div>
             `).join('');
             updateDashboard();
         };
 
-        // --- FLASHCARD & NAVIGATION ---
+        // --- FLASHCARD ENGINE ---
         window.openPreview = (key) => {
             currentPreviewIndex = cloudDb.findIndex(w => w.fbKey === key);
             renderFlashcard(cloudDb[currentPreviewIndex]);
@@ -409,24 +403,22 @@
         };
 
         window.navigatePreview = (dir) => {
-            const next = currentPreviewIndex + dir;
-            if(next >= 0 && next < cloudDb.length) {
-                currentPreviewIndex = next;
-                renderFlashcard(cloudDb[currentPreviewIndex]);
-            }
+            const n = currentPreviewIndex + dir;
+            if(n >= 0 && n < cloudDb.length) { currentPreviewIndex = n; renderFlashcard(cloudDb[currentPreviewIndex]); }
         };
 
         function renderFlashcard(data) {
             document.getElementById('pv-word').innerText = data.word;
             document.getElementById('pv-tag').innerText = data.tag || "General Archive";
             const mBtn = document.getElementById('mastery-toggle-btn');
-            mBtn.innerText = data.mastered ? "Mastered ✓" : "Analyze Complete";
-            mBtn.className = data.mastered ? 'text-[10px] font-black uppercase px-10 py-4 rounded-full bg-obsidian-900 text-white' : 'text-[10px] font-black uppercase px-10 py-4 rounded-full bg-primary-500 text-white shadow-2xl';
+            mBtn.innerText = data.mastered ? "Unmark Mastery" : "Complete Mastery";
+            mBtn.className = data.mastered ? 'text-[10px] font-black uppercase px-12 py-5 rounded-full bg-stone-950 text-white' : 'text-[10px] font-black uppercase px-12 py-5 rounded-full bg-primary-500 text-white shadow-2xl';
             document.getElementById('pv-meanings-container').innerHTML = data.deepData.map(d => `
-                <div class="bg-white dark:bg-obsidian-800 p-14 rounded-[5rem] border-2 border-primary-50 dark:border-stone-800 shadow-xl">
-                    <span class="text-[11px] font-black uppercase text-primary-500 tracking-[0.5em] mb-6 inline-block">${d.pos}</span>
-                    <p class="text-5xl font-black dark:text-white leading-tight tracking-tighter">${d.def}</p>
-                    ${d.example ? `<p class="mt-10 text-primary-600 dark:text-primary-400 font-semibold italic text-3xl leading-snug">" ${d.example} "</p>` : ''}
+                <div class="bg-white dark:bg-obsidian-800 p-20 rounded-[6rem] border-4 border-primary-50 dark:border-stone-800 shadow-2xl relative overflow-hidden">
+                    <span class="text-[12px] font-black uppercase text-primary-500 tracking-[0.6em] mb-8 inline-block">${d.pos}</span>
+                    <p class="text-6xl font-black dark:text-white leading-tight tracking-tighter">${d.def}</p>
+                    ${d.example ? `<p class="mt-14 text-primary-600 dark:text-primary-400 font-semibold italic text-4xl leading-snug">" ${d.example} "</p>` : ''}
+                    <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-primary-100 dark:bg-stone-700/20 rounded-full"></div>
                 </div>
             `).join('');
         }
@@ -438,13 +430,10 @@
             showToast("Mastery Updated");
         };
 
-        // --- DASHBOARD ANALYTICS ---
         function updateDashboard() {
-            const today = new Date().setHours(0,0,0,0);
-            const count = cloudDb.filter(w => w.date >= today).length;
-            document.getElementById('daily-count-text').innerText = count;
-            document.getElementById('goal-progress-bar').style.width = `${Math.min((count / 5) * 100, 100)}%`;
-            
+            const countToday = cloudDb.filter(w => w.date >= new Date().setHours(0,0,0,0)).length;
+            document.getElementById('daily-count-text').innerText = countToday;
+            document.getElementById('goal-progress-bar').style.width = `${Math.min((countToday / 5) * 100, 100)}%`;
             const mastered = cloudDb.filter(w => w.mastered).length;
             document.getElementById('profile-rate').innerText = cloudDb.length ? Math.round((mastered / cloudDb.length) * 100) : 0;
             document.getElementById('profile-streak').innerText = [...new Set(cloudDb.map(w => new Date(w.date).toDateString()))].length;
@@ -457,19 +446,18 @@
             setTimeout(() => t.classList.remove('active'), 3000);
         }
 
-        window.deleteWord = (key) => { if(confirm("Erase entry from cloud network?")) remove(ref(rtdb, `users/${activeUser.uid}/words/${key}`)); };
+        window.deleteWord = (key) => { if(confirm("Erase entry from cloud?")) remove(ref(rtdb, `users/${activeUser.uid}/words/${key}`)); };
         window.toggleDarkMode = () => { const d = document.documentElement.classList.toggle('dark'); localStorage.theme = d ? 'dark' : 'light'; };
         window.openProfile = () => document.getElementById('profile-modal').classList.add('active');
         window.closeProfile = () => document.getElementById('profile-modal').classList.remove('active');
         window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
         window.handleLogout = () => signOut(auth);
         window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-        window.speakWord = (t) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(t));
         function toggleLoader(s) { document.getElementById('search-loader').style.display = s ? 'block' : 'none'; }
         window.exportToExcel = () => {
-            const ws = XLSX.utils.json_to_sheet(cloudDb.map(w => ({ Word: w.word, Category: w.tag, Date: new Date(w.date).toLocaleDateString() })));
+            const ws = XLSX.utils.json_to_sheet(cloudDb.map(w => ({ Word: w.word, Mastery: w.mastered, Tag: w.tag, Date: new Date(w.date).toLocaleDateString() })));
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Vault");
-            XLSX.writeFile(wb, "Archive_Export.xlsx");
+            XLSX.writeFile(wb, "WordVault_Master_Archive.xlsx");
         };
     </script>
 </body>
