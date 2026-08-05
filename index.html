@@ -1,237 +1,404 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WordVault Pro | Mastery OS</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
                     colors: {
-                        gold: { 50: '#fffcf0', 100: '#fef3c7', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 900: '#78350f' },
-                        obsidian: { 950: '#020617', 900: '#0c0a09', 800: '#0f172a' }
+                        vault: { 
+                            50: '#f9f8e8', 100: '#f1efc6', 200: '#e5de93', 300: '#d7c858', 
+                            400: '#cbb02e', 500: '#b89624', 600: '#9d751c', 700: '#7e5618', 
+                            800: '#6a4519', 900: '#5a3818', 950: '#331d09' 
+                        },
+                        surface: {
+                            50: '#fafafa', 100: '#f4f4f5', 200: '#e4e4e7', 300: '#d4d4d8',
+                            800: '#27272a', 900: '#18181b', 950: '#09090b'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
         }
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
     </script>
 
     <style>
-        body { font-family: 'Outfit', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        .light body { background-color: #fafaf9; color: #1c1917; }
-        .dark body { background-color: #09090b; color: #fef3c7; }
-
-        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(245, 158, 11, 0.1); }
-        .dark .glass { background: rgba(15, 23, 42, 0.85); border-color: rgba(245, 158, 11, 0.05); }
-
-        .word-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .word-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -10px rgba(245, 158, 11, 0.2); }
-
-        #word-preview-modal, #hub-modal, #quiz-modal {
-            transform: translateY(100%);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 150;
+        body { 
+            transition: background-color 0.4s ease, color 0.4s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            overflow-x: hidden; 
         }
-        .active { transform: translateY(0) !important; }
+        .light body { background-color: #f4f4f5; color: #18181b; }
+        .dark body { background-color: #09090b; color: #f4f4f5; }
 
-        .loader { border: 2px solid #fef3c7; border-top: 2px solid #f59e0b; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: none; }
+        /* Premium Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+        .dark .glass-panel {
+            background: rgba(24, 24, 27, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark .glass-nav {
+            background: rgba(9, 9, 11, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Hover FX */
+        .word-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        .word-card:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(250, 250, 250, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .modal-overlay {
+            background: rgba(9, 9, 11, 0.85);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Loaders */
+        .loader {
+            border: 2.5px solid rgba(184, 150, 36, 0.2);
+            border-top: 2.5px solid #b89624;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+            display: none;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .progress-fill { transition: width 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #27272a; }
 
-        /* Fixed: responsive toast position (previously invalid `md:` properties inside plain CSS) */
+        /* Toast */
         #toast {
             position: fixed;
-            bottom: 6rem;
-            left: 1rem;
-            right: 1rem;
+            bottom: 6.5rem;
+            left: 50%;
+            transform: translate(-50%, 150%) scale(0.9);
             z-index: 500;
-            transform: translateY(200%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
         }
-        @media (min-width: 768px) {
-            #toast { left: auto; right: 2rem; bottom: 2rem; max-width: 22rem; }
+        @media (min-width: 1024px) {
+            #toast { bottom: 2rem; left: auto; right: 2rem; transform: translate(150%, 0) scale(0.9); }
+            #toast.active { transform: translate(0, 0) scale(1); opacity: 1; }
         }
-        #toast.active { transform: translateY(0); }
+        #toast.active { transform: translate(-50%, 0) scale(1); opacity: 1; }
 
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        :focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        :focus-visible { outline: 2px solid #b89624; outline-offset: 2px; }
+        input:-webkit-autofill { transition: background-color 5000s ease-in-out 0s; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen text-surface-900 dark:text-surface-50 antialiased selection:bg-vault-500 selection:text-white relative">
 
-    <div id="toast" class="bg-stone-900 dark:bg-gold-500 text-white dark:text-stone-950 px-6 py-3 rounded-2xl shadow-xl font-bold flex items-center justify-center gap-3">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></div>
-        <span id="toast-msg" class="text-xs uppercase tracking-widest font-black">Sync Successful</span>
+    <!-- Ambient Background Blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-vault-500/20 dark:bg-vault-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-[100px] opacity-70 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-96 h-96 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-[100px] opacity-70 animate-blob animation-delay-2000"></div>
     </div>
 
-    <div id="login-screen" class="fixed inset-0 z-[300] bg-gold-500 flex items-center justify-center p-4 text-center">
-        <div class="bg-white dark:bg-obsidian-900 p-8 md:p-10 rounded-[2.5rem] shadow-2xl max-w-sm w-full border-4 border-gold-100">
-            <div class="w-14 h-14 bg-gold-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl text-white font-black text-xl">W</div>
-            <h2 id="auth-title" class="text-3xl font-black dark:text-white leading-tight">WordVault.</h2>
-            <p id="auth-subtitle" class="text-gold-600 text-[10px] uppercase font-bold tracking-widest mt-1 mb-8">Premium Archive</p>
+    <!-- Toast Notification -->
+    <div id="toast" class="glass-panel px-6 py-3.5 rounded-full flex items-center gap-3 border border-surface-200 dark:border-surface-800 shadow-xl">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+        <span id="toast-msg" class="text-xs font-bold tracking-wide">Sync Successful</span>
+    </div>
 
-            <div class="space-y-3">
-                <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-stone-50 dark:bg-zinc-800 border dark:border-zinc-700 py-3.5 rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4" alt="Google">
-                    Continue with Google
-                </button>
-                <div class="flex items-center gap-3 py-2"><div class="h-px bg-slate-100 dark:bg-zinc-800 flex-1"></div><span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">OR</span><div class="h-px bg-slate-100 dark:bg-zinc-800 flex-1"></div></div>
-                <input id="auth-email" type="email" placeholder="Email" class="w-full p-4 rounded-xl border dark:bg-stone-800 dark:border-zinc-700 outline-none focus:ring-2 focus:ring-gold-500 text-sm font-bold transition-all">
-                <input id="auth-pass" type="password" placeholder="Password" class="w-full p-4 rounded-xl border dark:bg-stone-800 dark:border-zinc-700 outline-none focus:ring-2 focus:ring-gold-500 text-sm font-bold transition-all">
-                <div id="auth-error" class="hidden text-left text-[11px] font-bold text-red-500 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2"></div>
-                <button onclick="handleAuth()" id="auth-main-btn" class="w-full bg-gold-500 text-white py-4 rounded-xl font-black shadow-lg hover:bg-gold-600 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <span id="auth-main-btn-text">Unlock Vault</span>
-                    <div id="auth-loader" class="loader" style="border-color: rgba(255,255,255,0.4); border-top-color: white;"></div>
-                </button>
-                <button onclick="toggleAuthMode()" id="toggle-btn" class="w-full text-center text-[10px] font-black text-gold-400 uppercase mt-4">Create Master Identity</button>
-                <button onclick="handleForgotPassword()" class="w-full text-center text-[9px] font-black text-stone-300 uppercase">Forgot password?</button>
+    <!-- Auth Screen -->
+    <div id="login-screen" class="fixed inset-0 z-[300] bg-surface-50 dark:bg-surface-950 flex items-center justify-center p-6 transition-opacity">
+        <div class="glass-panel p-8 sm:p-12 rounded-[2rem] max-w-md w-full relative overflow-hidden group">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-vault-500/20 rounded-full blur-[50px] transition-all group-hover:bg-vault-500/30"></div>
+            
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-gradient-to-br from-vault-400 to-vault-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-vault-500/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/></svg>
+                </div>
+                
+                <h2 id="auth-title" class="text-4xl font-extrabold tracking-tight mb-1">WordVault.</h2>
+                <p id="auth-subtitle" class="text-surface-500 dark:text-surface-400 text-sm font-medium mb-8">Secure your linguistic mastery.</p>
+
+                <div class="space-y-4">
+                    <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 py-3.5 rounded-xl font-semibold hover:bg-surface-50 dark:hover:bg-surface-700 transition-all active:scale-[0.98]">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-5 h-5" alt="Google">
+                        Continue with Google
+                    </button>
+                    
+                    <div class="flex items-center gap-4 py-2 opacity-60">
+                        <div class="h-px bg-surface-300 dark:bg-surface-700 flex-1"></div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-surface-500">Or use email</span>
+                        <div class="h-px bg-surface-300 dark:bg-surface-700 flex-1"></div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <input id="auth-email" type="email" placeholder="Email address" class="w-full px-4 py-3.5 rounded-xl bg-white/50 dark:bg-surface-900/50 border border-surface-200 dark:border-surface-700 outline-none focus:border-vault-500 focus:ring-1 focus:ring-vault-500 transition-all placeholder-surface-400">
+                        <input id="auth-pass" type="password" placeholder="Password" class="w-full px-4 py-3.5 rounded-xl bg-white/50 dark:bg-surface-900/50 border border-surface-200 dark:border-surface-700 outline-none focus:border-vault-500 focus:ring-1 focus:ring-vault-500 transition-all placeholder-surface-400">
+                    </div>
+                    
+                    <div id="auth-error" class="hidden text-[13px] font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg p-3 border border-red-100 dark:border-red-900/50"></div>
+                    
+                    <button onclick="handleAuth()" id="auth-main-btn" class="w-full bg-vault-500 hover:bg-vault-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-vault-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                        <span id="auth-main-btn-text">Unlock Vault</span>
+                        <div id="auth-loader" class="loader" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
+                    </button>
+                    
+                    <div class="flex justify-between items-center mt-6 pt-2">
+                        <button onclick="toggleAuthMode()" id="toggle-btn" class="text-[13px] font-semibold text-vault-600 dark:text-vault-400 hover:opacity-80 transition-opacity">Create Account</button>
+                        <button onclick="handleForgotPassword()" class="text-[13px] font-medium text-surface-500 hover:text-surface-900 dark:hover:text-surface-300 transition-colors">Forgot?</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="hub-modal" class="fixed inset-0 bg-stone-50 dark:bg-obsidian-950 flex flex-col overflow-hidden">
-        <nav class="p-4 flex items-center justify-between border-b dark:border-stone-800 bg-white dark:bg-obsidian-900">
-            <button onclick="closeHub()" class="p-2 bg-stone-50 dark:bg-stone-800 rounded-full text-gold-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <span class="font-black text-[10px] uppercase tracking-widest opacity-50">Identity Hub</span>
-            <div class="flex gap-2">
-                <button onclick="saveProfileChanges()" id="profile-save-btn" class="text-gold-600 font-black text-xs uppercase hidden">Sync</button>
-                <button id="profile-edit-trigger" onclick="enableProfileEdit()" class="p-2 text-gold-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-            </div>
-        </nav>
-        <div class="flex-1 overflow-y-auto p-6 md:p-12">
-            <div class="max-w-4xl mx-auto">
+    <!-- Identity Hub Modal -->
+    <div id="hub-modal" class="modal-overlay fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="modal-content glass-panel w-full max-w-2xl max-h-[90vh] rounded-[2rem] flex flex-col overflow-hidden relative">
+            <nav class="p-6 flex items-center justify-between border-b border-surface-200/50 dark:border-surface-800/50">
+                <span class="font-bold text-sm tracking-wide flex items-center gap-2"><svg class="w-5 h-5 text-vault-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> Identity Hub</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="saveProfileChanges()" id="profile-save-btn" class="text-vault-600 dark:text-vault-400 font-bold text-sm hidden bg-vault-50 dark:bg-vault-950/30 px-4 py-1.5 rounded-full">Save Changes</button>
+                    <button id="profile-edit-trigger" onclick="enableProfileEdit()" class="p-2 text-surface-500 hover:text-vault-500 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button onclick="closeHub()" class="p-2 text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+            </nav>
+            <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
                 <div class="flex flex-col items-center text-center mb-10">
-                    <div class="relative inline-block mb-4 group">
-                        <img id="user-pfp-large" src="" class="w-28 h-28 rounded-3xl border-4 border-white dark:border-stone-800 shadow-xl object-cover hidden">
-                        <div id="user-avatar-placeholder" class="w-28 h-28 rounded-3xl bg-gold-500 text-white flex items-center justify-center text-4xl font-black shadow-xl">?</div>
-                        <label class="absolute inset-0 bg-stone-900/40 rounded-3xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                    <div class="relative inline-block mb-5 group">
+                        <img id="user-pfp-large" src="" class="w-28 h-28 rounded-[2rem] border-[3px] border-white dark:border-surface-800 shadow-xl object-cover hidden">
+                        <div id="user-avatar-placeholder" class="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-vault-400 to-vault-600 text-white flex items-center justify-center text-4xl font-extrabold shadow-xl">?</div>
+                        <label class="absolute inset-0 bg-black/50 rounded-[2rem] flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition-all backdrop-blur-sm">
                             <input type="file" accept="image/*" class="hidden" onchange="handlePfpUpload(event)">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
                         </label>
                     </div>
-                    <input id="edit-display-name" type="text" readonly class="text-3xl font-black bg-transparent text-center outline-none w-full mb-1 dark:text-white tracking-tight" value="...">
-                    <input id="edit-bio" type="text" readonly placeholder="Mastery mission..." class="text-gold-600 dark:text-gold-400 bg-transparent text-center outline-none w-full italic font-medium text-sm" value="">
+                    <input id="edit-display-name" type="text" readonly class="text-3xl font-extrabold bg-transparent text-center outline-none w-full mb-1 tracking-tight" value="...">
+                    <input id="edit-bio" type="text" readonly placeholder="Set your learning mission..." class="text-surface-500 bg-transparent text-center outline-none w-full font-medium text-sm" value="">
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 text-center">
-                    <div class="p-5 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-zinc-800">
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Streak</p>
-                        <h4 id="profile-streak" class="text-xl font-black mt-1">0</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                    <div class="p-5 bg-white/50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 text-center">
+                        <p class="text-[10px] font-bold uppercase text-surface-400 tracking-wider mb-1">Streak</p>
+                        <h4 id="profile-streak" class="text-2xl font-extrabold text-orange-500">0<span class="text-sm">🔥</span></h4>
                     </div>
-                    <div class="p-5 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-zinc-800">
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Rate</p>
-                        <h4 id="profile-rate" class="text-xl font-black text-emerald-500">0%</h4>
+                    <div class="p-5 bg-white/50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 text-center">
+                        <p class="text-[10px] font-bold uppercase text-surface-400 tracking-wider mb-1">Retention</p>
+                        <h4 id="profile-rate" class="text-2xl font-extrabold text-emerald-500">0%</h4>
                     </div>
-                    <div class="p-5 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-zinc-800">
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Total</p>
-                        <h4 id="rep-total" class="text-xl font-black">0</h4>
+                    <div class="p-5 bg-white/50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 text-center">
+                        <p class="text-[10px] font-bold uppercase text-surface-400 tracking-wider mb-1">Total</p>
+                        <h4 id="rep-total" class="text-2xl font-extrabold text-blue-500">0</h4>
                     </div>
-                    <div class="p-5 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-zinc-800">
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Mastered</p>
-                        <h4 id="rep-mastered" class="text-xl font-black text-gold-500">0</h4>
+                    <div class="p-5 bg-white/50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 text-center">
+                        <p class="text-[10px] font-bold uppercase text-surface-400 tracking-wider mb-1">Mastered</p>
+                        <h4 id="rep-mastered" class="text-2xl font-extrabold text-vault-500">0</h4>
                     </div>
                 </div>
 
-                <div class="p-6 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-zinc-800">
-                    <h5 class="text-[9px] font-black uppercase tracking-[0.2em] text-gold-500 mb-6">Learning Pulse — Last 7 Days</h5>
-                    <canvas id="masteryChart" height="150"></canvas>
+                <div class="p-6 bg-white/50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 relative">
+                    <h5 class="text-xs font-bold text-surface-600 dark:text-surface-300 mb-6 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg> Learning Pulse (7 Days)</h5>
+                    <div class="relative h-40 w-full">
+                        <canvas id="masteryChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="word-preview-modal" class="fixed inset-0 bg-stone-50 dark:bg-obsidian-950 flex flex-col overflow-hidden">
-        <nav class="p-4 flex items-center justify-between border-b dark:border-stone-800 bg-white dark:bg-obsidian-900">
-            <button onclick="closePreview()" class="p-2 bg-slate-50 dark:bg-stone-800 rounded-full text-gold-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <div class="flex gap-2">
-                <button onclick="navigatePreview(-1)" class="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg active:scale-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-                <button onclick="navigatePreview(1)" class="p-2 bg-stone-100 dark:bg-zinc-800 rounded-lg active:scale-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-            </div>
-            <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[9px] font-black uppercase px-6 py-2 rounded-full bg-gold-500 text-white shadow-lg">Verify</button>
-        </nav>
-        <div class="flex-1 overflow-y-auto p-8 md:p-20 text-center flex flex-col justify-center">
-            <h1 id="pv-word" class="text-5xl md:text-8xl font-black dark:text-white capitalize mb-4 tracking-tighter">Word</h1>
-            <p id="pv-ipa" class="text-gold-500 font-bold mb-2 italic">/ phonetic /</p>
-            <button id="pv-audio-btn" onclick="playCurrentPreviewAudio()" class="hidden mx-auto mb-8 inline-flex items-center gap-2 text-[10px] font-black uppercase text-gold-600 bg-gold-50 dark:bg-zinc-800 px-4 py-2 rounded-full w-fit">🔊 Listen</button>
-            <div id="pv-meanings-container" class="max-w-xl mx-auto space-y-4 text-left"></div>
-        </div>
-    </div>
-
-    <div id="quiz-modal" class="fixed inset-0 bg-stone-50 dark:bg-obsidian-950 flex flex-col overflow-hidden">
-        <nav class="p-4 flex items-center justify-between border-b dark:border-stone-800 bg-white dark:bg-obsidian-900">
-            <button onclick="closeQuiz()" class="p-2 bg-stone-50 dark:bg-stone-800 rounded-full text-gold-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <span class="font-black text-[10px] uppercase tracking-widest opacity-50">Practice Round · <span id="quiz-progress">0/0</span></span>
-            <span class="text-[10px] font-black text-emerald-500" id="quiz-score">0 ✓</span>
-        </nav>
-        <div class="flex-1 overflow-y-auto flex flex-col items-center justify-center p-8 text-center">
-            <div class="max-w-md w-full">
-                <p class="text-[9px] font-black uppercase tracking-widest text-gold-500 mb-4">What does this word mean?</p>
-                <h1 id="quiz-word" class="text-5xl md:text-7xl font-black dark:text-white capitalize tracking-tighter mb-8"></h1>
-                <div id="quiz-answer" class="hidden bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-stone-100 dark:border-zinc-800 text-left mb-8">
-                    <span id="quiz-pos" class="text-[9px] font-black uppercase text-gold-500"></span>
-                    <p id="quiz-def" class="text-lg font-bold dark:text-white mt-2 leading-tight"></p>
+    <!-- Word Preview Modal -->
+    <div id="word-preview-modal" class="modal-overlay fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="modal-content glass-panel w-full max-w-2xl max-h-[90vh] rounded-[2rem] flex flex-col overflow-hidden relative">
+            <nav class="p-4 flex items-center justify-between border-b border-surface-200/50 dark:border-surface-800/50 bg-white/30 dark:bg-surface-900/30">
+                <button onclick="closePreview()" class="p-2 text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <div class="flex gap-2">
+                    <button onclick="navigatePreview(-1)" class="p-2.5 bg-surface-100 dark:bg-surface-800 rounded-xl hover:bg-surface-200 dark:hover:bg-surface-700 active:scale-95 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                    <button onclick="navigatePreview(1)" class="p-2.5 bg-surface-100 dark:bg-surface-800 rounded-xl hover:bg-surface-200 dark:hover:bg-surface-700 active:scale-95 transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                 </div>
-                <button onclick="revealQuiz()" id="quiz-reveal-btn" class="w-full bg-gold-500 text-white py-4 rounded-2xl font-black active:scale-95 transition-all">Reveal Meaning</button>
-                <div id="quiz-judge-btns" class="hidden grid grid-cols-2 gap-3">
-                    <button onclick="quizAnswer(false)" class="bg-stone-100 dark:bg-zinc-800 dark:text-white py-4 rounded-2xl font-black active:scale-95 transition-all">Still Learning</button>
-                    <button onclick="quizAnswer(true)" class="bg-emerald-500 text-white py-4 rounded-2xl font-black active:scale-95 transition-all">Got It</button>
+                <button id="mastery-toggle-btn" onclick="toggleMastery()" class="text-[11px] font-bold uppercase tracking-wide px-6 py-2.5 rounded-xl bg-vault-500 text-white shadow-lg shadow-vault-500/20 active:scale-95 transition-all flex items-center gap-2">
+                    Verify
+                </button>
+            </nav>
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
+                <div class="max-w-xl mx-auto text-center flex flex-col justify-center min-h-full">
+                    <h1 id="pv-word" class="text-5xl md:text-7xl font-extrabold capitalize mb-2 tracking-tight">Word</h1>
+                    <p id="pv-ipa" class="text-vault-600 dark:text-vault-400 font-medium mb-6 text-lg font-mono tracking-wide"></p>
+                    
+                    <button id="pv-audio-btn" onclick="playCurrentPreviewAudio()" class="hidden mx-auto mb-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-vault-700 dark:text-vault-300 bg-vault-100 dark:bg-vault-900/40 px-5 py-2.5 rounded-full hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/></svg>
+                        Listen
+                    </button>
+                    
+                    <div id="pv-meanings-container" class="space-y-4 text-left"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="app-content" class="hidden">
-        <nav class="fixed bottom-4 left-4 right-4 lg:left-6 lg:top-1/2 lg:-translate-y-1/2 lg:w-16 h-16 lg:h-auto bg-white/95 dark:bg-obsidian-800/95 backdrop-blur-xl border border-stone-200 dark:border-stone-800 z-50 flex lg:flex-col items-center justify-around lg:justify-center gap-6 p-2 rounded-2xl lg:rounded-3xl shadow-2xl">
-            <button onclick="toggleDarkMode()" class="p-2 text-stone-400 hover:text-gold-500 transition-all active:scale-75" title="Toggle theme"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button>
-            <button onclick="startQuiz()" class="p-2 text-stone-400 hover:text-gold-500 transition-all active:scale-75" title="Practice round"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></button>
-            <button onclick="openHub()" class="w-10 h-10 rounded-xl border-2 border-gold-500 overflow-hidden bg-gold-500 text-white font-black text-xs uppercase flex items-center justify-center transition-all active:scale-75 shadow-lg" title="Identity hub">
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="modal-overlay fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="modal-content glass-panel w-full max-w-lg max-h-[90vh] rounded-[2rem] flex flex-col overflow-hidden relative">
+            <nav class="p-5 flex items-center justify-between border-b border-surface-200/50 dark:border-surface-800/50">
+                <span class="font-bold text-xs uppercase tracking-widest text-surface-500 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Training <span id="quiz-progress" class="ml-2 text-surface-900 dark:text-white">0/0</span></span>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-extrabold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-lg" id="quiz-score">0 ✓</span>
+                    <button onclick="closeQuiz()" class="p-1.5 text-surface-400 hover:text-surface-900 dark:hover:text-white transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+            </nav>
+            <div class="flex-1 p-8 flex flex-col items-center justify-center text-center">
+                <div class="w-full max-w-sm">
+                    <p class="text-xs font-bold uppercase tracking-widest text-vault-500 mb-6">What does this word mean?</p>
+                    <h1 id="quiz-word" class="text-5xl font-extrabold capitalize tracking-tight mb-10"></h1>
+                    
+                    <div id="quiz-answer" class="hidden animate-fade-in bg-surface-50 dark:bg-surface-800/50 p-6 rounded-2xl border border-surface-200 dark:border-surface-700 text-left mb-8">
+                        <span id="quiz-pos" class="text-[10px] font-bold uppercase tracking-wider text-vault-600 dark:text-vault-400 bg-vault-100 dark:bg-vault-900/30 px-2 py-1 rounded"></span>
+                        <p id="quiz-def" class="text-lg font-semibold mt-4 leading-relaxed"></p>
+                    </div>
+                    
+                    <button onclick="revealQuiz()" id="quiz-reveal-btn" class="w-full bg-surface-900 dark:bg-white text-white dark:text-surface-900 py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Reveal Meaning</button>
+                    
+                    <div id="quiz-judge-btns" class="hidden grid grid-cols-2 gap-4">
+                        <button onclick="quizAnswer(false)" class="bg-surface-200 dark:bg-surface-800 text-surface-700 dark:text-surface-200 py-4 rounded-xl font-bold active:scale-95 transition-all hover:bg-surface-300 dark:hover:bg-surface-700">Still Learning</button>
+                        <button onclick="quizAnswer(true)" class="bg-emerald-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all hover:bg-emerald-600">Got It</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
+    <div id="app-content" class="hidden relative z-10">
+        <!-- Floating Navigation Navigation -->
+        <nav class="glass-nav fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] sm:w-auto lg:left-8 lg:top-1/2 lg:-translate-y-1/2 lg:-translate-x-0 lg:w-[72px] lg:h-auto z-50 flex lg:flex-col items-center justify-between sm:justify-center gap-2 sm:gap-6 px-6 py-3 lg:py-8 rounded-full shadow-2xl">
+            <button onclick="toggleDarkMode()" class="p-2.5 text-surface-400 hover:text-vault-500 transition-colors active:scale-90" title="Toggle theme">
+                <svg class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
+            <button onclick="startQuiz()" class="p-2.5 text-surface-400 hover:text-vault-500 transition-colors active:scale-90" title="Training Mode">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+            </button>
+            <button onclick="openHub()" class="w-12 h-12 rounded-full border-2 border-vault-500 overflow-hidden bg-vault-50 text-vault-600 font-extrabold text-sm flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-vault-500/20" title="Identity Hub">
                 <img id="user-pfp-sidebar" src="" class="hidden w-full h-full object-cover">
                 <span id="user-avatar-sidebar">?</span>
             </button>
-            <button onclick="exportToExcel()" class="p-2 text-stone-400 hover:text-emerald-500 active:scale-75 transition-all" title="Export to Excel"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></button>
-            <button onclick="handleLogout()" class="p-2 text-stone-400 hover:text-red-500 active:scale-75 transition-all" title="Log out"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            <button onclick="exportToExcel()" class="p-2.5 text-surface-400 hover:text-emerald-500 transition-colors active:scale-90" title="Export to Excel">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </button>
+            <button onclick="handleLogout()" class="p-2.5 text-surface-400 hover:text-red-500 transition-colors active:scale-90" title="Log out">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </button>
         </nav>
 
-        <main class="p-6 lg:ml-28 max-w-6xl mx-auto pb-28 lg:pb-6">
-            <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <main class="p-6 pt-10 lg:pl-32 max-w-[1400px] mx-auto pb-32 lg:pb-12 min-h-screen">
+            <header class="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-fade-in">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-black dark:text-white tracking-tighter leading-none">Vault.</h1>
-                    <p id="user-display" class="text-[10px] font-black text-gold-600 uppercase mt-2 tracking-widest opacity-50 italic">Establishing Link...</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-none mb-2">My Vault.</h1>
+                    <p class="text-xs font-bold text-vault-600 dark:text-vault-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+                        <span id="user-display">Establishing Link...</span>
+                    </p>
                 </div>
-                <div class="bg-white dark:bg-stone-900 p-5 rounded-3xl min-w-[240px] shadow-sm border border-stone-100 dark:border-zinc-800">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[9px] font-black uppercase text-stone-400">Daily Mission</span>
-                        <span class="text-xs font-black text-gold-600"><span id="daily-count-text">0</span> / 5</span>
+                
+                <div class="glass-panel p-5 rounded-2xl min-w-[260px]">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-bold uppercase text-surface-500 tracking-wider">Daily Mission</span>
+                        <span class="text-xs font-extrabold text-vault-600 dark:text-vault-400 bg-vault-100 dark:bg-vault-900/30 px-2 py-1 rounded"><span id="daily-count-text">0</span> / 5</span>
                     </div>
-                    <div class="w-full bg-stone-50 dark:bg-zinc-800 h-1 rounded-full overflow-hidden">
-                        <div id="goal-progress-bar" class="progress-fill bg-gold-500 h-full w-0 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                    <div class="w-full bg-surface-200 dark:bg-surface-800 h-1.5 rounded-full overflow-hidden">
+                        <div id="goal-progress-bar" class="bg-vault-500 h-full w-0 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(184,150,36,0.5)]"></div>
                     </div>
                 </div>
             </header>
 
-            <div class="max-w-2xl mx-auto mb-16 sticky top-4 z-40">
-                <div class="bg-white dark:bg-stone-900 rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] p-2 border-2 border-stone-200 dark:border-stone-800 flex flex-col focus-within:ring-4 focus-within:ring-gold-500/10 transition-all">
+            <div class="max-w-3xl mx-auto mb-16 relative z-40 animate-slide-up">
+                <div class="glass-panel rounded-3xl p-2.5 transition-all focus-within:ring-4 focus-within:ring-vault-500/20 focus-within:border-vault-500/50">
                     <div class="flex items-center">
-                        <input id="word-input" type="text" placeholder="Explore word... (/)" class="w-full bg-transparent p-4 outline-none text-lg font-bold dark:text-white tracking-tight">
+                        <svg class="w-6 h-6 text-surface-400 ml-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input id="word-input" type="text" placeholder="Explore a new word... (Press '/')" class="w-full bg-transparent p-3 outline-none text-lg font-medium placeholder-surface-400">
                         <div id="search-loader" class="loader mr-4"></div>
-                        <button id="master-btn" onclick="searchWord()" class="bg-gold-500 text-white px-8 py-3 rounded-2xl font-black text-sm active:scale-95 transition-all disabled:active:scale-100">MASTER</button>
+                        <button id="master-btn" onclick="searchWord()" class="bg-surface-900 dark:bg-white text-white dark:text-surface-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all ml-2 whitespace-nowrap disabled:active:scale-100 hover:opacity-90">Search</button>
                     </div>
-                    <div class="px-4 pb-3 border-t border-stone-100 dark:border-zinc-800 pt-3 flex items-center gap-3">
-                        <span class="text-[8px] font-black uppercase text-stone-300 tracking-widest">Category:</span>
-                        <select id="tag-selector" class="bg-stone-50 dark:bg-stone-800 text-[10px] font-black px-3 py-1 rounded-full outline-none dark:text-gold-100 cursor-pointer">
+                    <div class="px-5 pb-2 pt-3 flex items-center gap-3 border-t border-surface-200/50 dark:border-surface-700/50 mt-1">
+                        <span class="text-[10px] font-bold uppercase text-surface-400 tracking-wider">Category:</span>
+                        <select id="tag-selector" class="bg-surface-100 dark:bg-surface-800 text-xs font-semibold px-3 py-1.5 rounded-lg outline-none cursor-pointer border border-transparent focus:border-vault-500">
                             <option value="General">General</option>
                             <option value="GRE Prep">GRE</option>
                             <option value="Tech">Technical</option>
@@ -241,46 +408,54 @@
                 </div>
             </div>
 
-            <section id="search-result" class="hidden max-w-2xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-5">
-                <div class="glass p-8 rounded-[2.5rem] shadow-2xl border-2 border-gold-100 dark:border-zinc-800">
-                    <div id="result-content"></div>
-                    <button onclick="saveToCloud()" id="save-word-btn" class="w-full mt-10 bg-zinc-900 dark:bg-gold-500 text-white dark:text-zinc-900 py-4 rounded-2xl font-black text-md active:scale-[0.98] transition-all">Archive Data to Cloud</button>
+            <section id="search-result" class="hidden max-w-3xl mx-auto mb-24">
+                <div class="glass-panel p-8 sm:p-10 rounded-[2.5rem] relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-vault-500/10 rounded-full blur-[60px] pointer-events-none"></div>
+                    <div id="result-content" class="relative z-10"></div>
+                    <button onclick="saveToCloud()" id="save-word-btn" class="relative z-10 w-full mt-10 bg-vault-500 hover:bg-vault-600 text-white py-4 rounded-xl font-bold text-md active:scale-[0.98] transition-all shadow-lg shadow-vault-500/25 flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                        Archive to Vault
+                    </button>
                 </div>
             </section>
 
-            <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center opacity-30">
-                <div class="w-16 h-16 mb-4 bg-stone-100 rounded-full flex items-center justify-center text-gold-500">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                </div>
-                <h3 class="text-xl font-black">Archive Empty</h3>
-                <p class="text-xs font-bold uppercase mt-2">Start your search above.</p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-                <h3 class="text-2xl font-black dark:text-white tracking-tight leading-none">The Collection <span id="stat-total" class="text-xs font-black text-gold-500 ml-2">0</span></h3>
-                <div class="flex items-center gap-2">
-                    <select id="lib-filter-tag" onchange="renderLibrary()" class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-3 rounded-xl text-[10px] font-black outline-none shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-slide-up" style="animation-delay: 100ms;">
+                <h3 class="text-2xl font-extrabold tracking-tight flex items-center gap-3">
+                    Collection 
+                    <span id="stat-total" class="text-sm font-bold bg-surface-200 dark:bg-surface-800 px-3 py-1 rounded-full text-surface-600 dark:text-surface-300">0</span>
+                </h3>
+                <div class="flex items-center gap-3 bg-white/50 dark:bg-surface-900/50 p-1.5 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 backdrop-blur-md">
+                    <div class="relative">
+                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Filter vault..." class="w-36 bg-transparent pl-9 pr-3 py-2 text-sm outline-none font-medium placeholder-surface-400">
+                    </div>
+                    <div class="h-6 w-px bg-surface-200 dark:bg-surface-700"></div>
+                    <select id="lib-filter-tag" onchange="renderLibrary()" class="bg-transparent pl-2 pr-4 py-2 text-sm font-semibold outline-none cursor-pointer">
                         <option value="All">All Categories</option>
                         <option value="GRE Prep">GRE</option>
                         <option value="Tech">Technical</option>
                         <option value="General">General</option>
                         <option value="Personal">Personal</option>
                     </select>
-                    <input id="lib-search" oninput="renderLibrary()" type="text" placeholder="Filter..." class="w-32 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-3 rounded-xl text-[10px] outline-none font-bold shadow-sm">
                 </div>
             </div>
-            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-24 text-center">
+                <div class="w-20 h-20 mb-6 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center text-vault-500 shadow-inner">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Vault is Empty</h3>
+                <p class="text-sm font-medium text-surface-500 max-w-xs">Start your mastery journey by exploring new words above.</p>
+            </div>
+
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-slide-up" style="animation-delay: 200ms;"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import {
-            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-            onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyALVLkn_ajWsnEjn3icZRBt3R3NeyxpbnA",
@@ -305,13 +480,11 @@
         let cloudDb = [];
         let currentPreviewIndex = 0;
         let masteryChart = null;
-
-        // Quiz state
         let quizQueue = [];
         let quizIndex = 0;
         let quizScore = 0;
 
-        // --- HELPERS ---
+        // Helpers
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str ?? '';
@@ -328,9 +501,7 @@
             el.innerText = msg;
             el.classList.remove('hidden');
         }
-        function clearAuthError() {
-            document.getElementById('auth-error').classList.add('hidden');
-        }
+        function clearAuthError() { document.getElementById('auth-error').classList.add('hidden'); }
 
         function friendlyAuthError(e) {
             const code = e?.code || '';
@@ -343,21 +514,28 @@
             return "Something went wrong. Please try again.";
         }
 
-        // --- AUTH ---
+        // Auth
         window.handleAuth = async () => {
             clearAuthError();
             const email = document.getElementById('auth-email').value.trim();
             const pass = document.getElementById('auth-pass').value.trim();
             if (!email || !pass) { showAuthError("Enter both email and password."); return; }
-            document.getElementById('auth-loader').style.display = 'block';
-            document.getElementById('auth-main-btn').disabled = true;
+            
+            const btn = document.getElementById('auth-main-btn');
+            const loader = document.getElementById('auth-loader');
+            const text = document.getElementById('auth-main-btn-text');
+            
+            loader.style.display = 'block';
+            text.style.display = 'none';
+            btn.disabled = true;
+            
             try {
                 isSignUpMode ? await createUserWithEmailAndPassword(auth, email, pass) : await signInWithEmailAndPassword(auth, email, pass);
             } catch(e) {
                 showAuthError(friendlyAuthError(e));
-            } finally {
-                document.getElementById('auth-loader').style.display = 'none';
-                document.getElementById('auth-main-btn').disabled = false;
+                loader.style.display = 'none';
+                text.style.display = 'block';
+                btn.disabled = false;
             }
         };
 
@@ -369,29 +547,35 @@
         window.handleForgotPassword = async () => {
             clearAuthError();
             const email = document.getElementById('auth-email').value.trim();
-            if (!email) { showAuthError("Enter your email above first."); return; }
+            if (!email) { showAuthError("Enter your email address first to reset password."); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
                 showAuthError("Reset link sent — check your inbox.");
-            } catch(e) {
-                showAuthError(friendlyAuthError(e));
-            }
+                document.getElementById('auth-error').classList.replace('text-red-600', 'text-emerald-600');
+                document.getElementById('auth-error').classList.replace('bg-red-50', 'bg-emerald-50');
+            } catch(e) { showAuthError(friendlyAuthError(e)); }
         };
 
         window.handleLogout = () => signOut(auth);
+        
         window.toggleAuthMode = () => {
             isSignUpMode = !isSignUpMode;
             clearAuthError();
-            document.getElementById('auth-title').innerText = isSignUpMode ? "Identity." : "Vault.";
-            document.getElementById('auth-main-btn-text').innerText = isSignUpMode ? "Register" : "Unlock Vault";
-            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Already have an ID? Login" : "Create Master Identity";
+            document.getElementById('auth-title').innerText = isSignUpMode ? "Create Identity." : "WordVault.";
+            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Join the mastery OS." : "Secure your linguistic mastery.";
+            document.getElementById('auth-main-btn-text').innerText = isSignUpMode ? "Register Account" : "Unlock Vault";
+            document.getElementById('toggle-btn').innerText = isSignUpMode ? "Already have an ID? Login" : "Create Account";
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 activeUser = user;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('app-content').classList.remove('hidden');
+                }, 300);
+                
                 onValue(ref(rtdb, `users/${user.uid}/profile`), (snap) => applyProfile(snap.val(), user));
                 onValue(ref(rtdb, `users/${user.uid}/words`), (snap) => {
                     const d = snap.val();
@@ -402,11 +586,17 @@
                 activeUser = null;
                 cloudDb = [];
                 document.getElementById('login-screen').classList.remove('hidden');
+                setTimeout(() => document.getElementById('login-screen').style.opacity = '1', 50);
                 document.getElementById('app-content').classList.add('hidden');
+                
+                // Reset auth button UI
+                document.getElementById('auth-loader').style.display = 'none';
+                document.getElementById('auth-main-btn-text').style.display = 'block';
+                document.getElementById('auth-main-btn').disabled = false;
             }
         });
 
-        // --- IDENTITY HUB ---
+        // Identity Hub
         function applyProfile(p, user) {
             const name = p?.displayName || user.displayName || user.email.split('@')[0];
             document.getElementById('edit-display-name').value = name;
@@ -414,6 +604,7 @@
             document.getElementById('user-display').innerText = `Licensed: ${name}`;
             document.getElementById('user-avatar-sidebar').innerText = name.charAt(0).toUpperCase();
             document.getElementById('user-avatar-placeholder').innerText = name.charAt(0).toUpperCase();
+            
             const photo = p?.photoBase64 || user.photoURL;
             if (photo) {
                 document.getElementById('user-pfp-sidebar').src = photo; document.getElementById('user-pfp-sidebar').classList.remove('hidden');
@@ -448,33 +639,40 @@
                     displayName: document.getElementById('edit-display-name').value.trim(),
                     bio: document.getElementById('edit-bio').value.trim()
                 });
-                showToast("Vault Updates Pushed");
-            } catch(e) {
-                showToast("Couldn't save changes");
-            }
+                showToast("Identity Updated");
+            } catch(e) { showToast("Couldn't save changes"); }
+            
             document.getElementById('edit-display-name').readOnly = true;
+            document.getElementById('edit-display-name').classList.remove('border-b', 'border-vault-500', 'bg-surface-100', 'dark:bg-surface-800');
             document.getElementById('edit-bio').readOnly = true;
+            document.getElementById('edit-bio').classList.remove('border-b', 'border-vault-500', 'bg-surface-100', 'dark:bg-surface-800');
             document.getElementById('profile-save-btn').classList.add('hidden');
             document.getElementById('profile-edit-trigger').classList.remove('hidden');
         };
 
         window.enableProfileEdit = () => {
             document.getElementById('edit-display-name').readOnly = false;
+            document.getElementById('edit-display-name').classList.add('border-b', 'border-vault-500', 'bg-surface-100', 'dark:bg-surface-800', 'rounded', 'px-2');
             document.getElementById('edit-bio').readOnly = false;
+            document.getElementById('edit-bio').classList.add('border-b', 'border-vault-500', 'bg-surface-100', 'dark:bg-surface-800', 'rounded', 'px-2');
             document.getElementById('profile-save-btn').classList.remove('hidden');
             document.getElementById('profile-edit-trigger').classList.add('hidden');
+            document.getElementById('edit-display-name').focus();
         };
 
-        // --- CORE ENGINE ---
+        // Core Engine
         window.searchWord = async () => {
             const word = document.getElementById('word-input').value.trim();
             if (!word) return;
             toggleLoader(true);
-            document.getElementById('search-result').classList.add('hidden');
+            const resultSection = document.getElementById('search-result');
+            resultSection.classList.add('hidden');
+            resultSection.classList.remove('animate-slide-up');
+            
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
                 if (!res.ok) {
-                    if (res.status === 404) showToast("No definition found — check the spelling");
+                    if (res.status === 404) showToast("Word not found in global index");
                     else showToast("Source node unresponsive");
                     currentWordData = null;
                     return;
@@ -500,26 +698,48 @@
             )].slice(0, 6);
             currentWordExtras.synonyms = synonyms;
 
-            document.getElementById('search-result').classList.remove('hidden');
+            const resultSection = document.getElementById('search-result');
+            resultSection.classList.remove('hidden');
+            
+            // Force reflow to trigger animation
+            void resultSection.offsetWidth;
+            resultSection.classList.add('animate-slide-up');
+
             document.getElementById('result-content').innerHTML = `
-                <p class="text-gold-600 font-black uppercase text-[10px] tracking-widest mb-1">${escapeHtml(data.meanings[0].partOfSpeech)}</p>
-                <h2 class="text-4xl font-black dark:text-white capitalize tracking-tighter">${escapeHtml(data.word)}</h2>
-                ${data.phonetic ? `<p class="text-gold-500 italic font-bold text-sm mt-1">/${escapeHtml(data.phonetic)}/</p>` : ''}
-                ${audioEntry ? `<button onclick="playAudio('${normalizeAudioUrl(audioEntry.audio)}')" class="mt-3 inline-flex items-center gap-2 text-[10px] font-black uppercase text-gold-600 bg-gold-50 dark:bg-zinc-800 px-4 py-2 rounded-full">🔊 Listen</button>` : ''}
-                <div class="mt-6 space-y-3">
-                    ${data.meanings.slice(0, 2).map(m => `<p class="text-sm dark:text-stone-300 leading-relaxed font-bold border-l-2 border-gold-200 pl-4">${escapeHtml(m.definitions[0].definition)}</p>`).join('')}
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-vault-600 dark:text-vault-400 font-bold uppercase text-[10px] tracking-widest bg-vault-100 dark:bg-vault-900/30 px-2 py-1 rounded inline-block">${escapeHtml(data.meanings[0].partOfSpeech)}</p>
+                    ${audioEntry ? `<button onclick="playAudio('${normalizeAudioUrl(audioEntry.audio)}')" class="p-2 text-vault-600 hover:bg-vault-100 dark:hover:bg-vault-900/30 rounded-full transition-colors"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/></svg></button>` : ''}
                 </div>
-                ${synonyms.length ? `<div class="mt-5 flex flex-wrap gap-2">${synonyms.map(s => `<span class="text-[9px] font-black uppercase bg-gold-50 dark:bg-zinc-800 text-gold-600 dark:text-gold-400 px-3 py-1 rounded-full">${escapeHtml(s)}</span>`).join('')}</div>` : ''}
+                <h2 class="text-5xl font-extrabold capitalize tracking-tight mb-2">${escapeHtml(data.word)}</h2>
+                ${data.phonetic ? `<p class="text-surface-500 font-mono text-sm tracking-wide mb-6">/${escapeHtml(data.phonetic)}/</p>` : ''}
+                
+                <div class="mt-6 space-y-4">
+                    ${data.meanings.slice(0, 2).map(m => `
+                        <div class="border-l-2 border-vault-300 dark:border-vault-700 pl-5 py-1">
+                            <p class="text-[15px] font-medium leading-relaxed">${escapeHtml(m.definitions[0].definition)}</p>
+                            ${m.definitions[0].example ? `<p class="text-sm italic text-surface-500 mt-2 font-serif opacity-80">"${escapeHtml(m.definitions[0].example)}"</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${synonyms.length ? `
+                    <div class="mt-8 flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-bold text-surface-400 uppercase tracking-wider mr-2">Synonyms:</span>
+                        ${synonyms.map(s => `<span class="text-[11px] font-semibold bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 px-3 py-1.5 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">${escapeHtml(s)}</span>`).join('')}
+                    </div>` : ''}
             `;
+            
             const saveBtn = document.getElementById('save-word-btn');
             const alreadySaved = cloudDb.some(w => w.word.toLowerCase() === data.word.toLowerCase());
             saveBtn.disabled = alreadySaved;
-            saveBtn.innerText = alreadySaved ? "Knowledge Present ✓" : "Archive Data to Cloud";
+            saveBtn.innerHTML = alreadySaved ? "Knowledge Present ✓" : `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg> Archive to Vault`;
+            if (alreadySaved) saveBtn.classList.replace('bg-vault-500', 'bg-surface-800');
+            else saveBtn.classList.replace('bg-surface-800', 'bg-vault-500');
         }
 
         window.playAudio = (url) => {
             if (!url) return;
-            new Audio(url).play().catch(() => showToast("Couldn't play audio"));
+            new Audio(url).play().catch(() => showToast("Couldn't play audio element"));
         };
 
         window.saveToCloud = async () => {
@@ -542,9 +762,9 @@
                 await push(ref(rtdb, `users/${activeUser.uid}/words`), wordObj);
                 document.getElementById('search-result').classList.add('hidden');
                 document.getElementById('word-input').value = "";
-                showToast("Cloud Synchronized");
+                showToast("Data Archived Successfully");
             } catch(e) {
-                showToast("Couldn't save — try again");
+                showToast("Cloud sync failed — try again");
             }
         };
 
@@ -562,18 +782,21 @@
                 grid.innerHTML = '';
             } else if (filtered.length === 0) {
                 emptyState.style.display = 'none';
-                grid.innerHTML = `<p class="col-span-full text-center text-xs font-black uppercase opacity-40 py-14">No matches for that filter</p>`;
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-16 text-surface-400"><svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><p class="text-sm font-bold uppercase tracking-widest">No matches found</p></div>`;
             } else {
                 emptyState.style.display = 'none';
                 grid.innerHTML = filtered.map(w => `
-                    <div onclick="openPreview('${w.fbKey}')" class="word-card bg-white dark:bg-zinc-900 p-6 rounded-3xl border-2 border-stone-100 dark:border-zinc-800 relative ${w.mastered ? 'bg-gold-50/20 border-gold-500' : 'shadow-sm'}">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-[8px] font-black uppercase text-gold-600 bg-gold-50 dark:bg-zinc-800 px-3 py-1 rounded-full">${escapeHtml(w.tag || 'General')}</span>
-                            <button onclick="event.stopPropagation(); deleteWord('${w.fbKey}')" class="p-1 text-gold-200 hover:text-red-500 transition-all active:scale-75"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    <div onclick="openPreview('${w.fbKey}')" class="word-card glass-panel p-6 rounded-[2rem] relative group ${w.mastered ? 'border-vault-400/50 dark:border-vault-500/30' : ''}">
+                        ${w.mastered ? `<div class="absolute inset-0 bg-vault-500/5 dark:bg-vault-500/10 rounded-[2rem] pointer-events-none"></div>` : ''}
+                        <div class="flex justify-between items-start mb-6 relative z-10">
+                            <span class="text-[9px] font-bold uppercase text-surface-500 tracking-wider bg-surface-100 dark:bg-surface-800 px-2.5 py-1 rounded-md border border-surface-200 dark:border-surface-700">${escapeHtml(w.tag || 'General')}</span>
+                            <button onclick="event.stopPropagation(); deleteWord('${w.fbKey}')" class="p-1.5 text-surface-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover:opacity-100 -mr-1 -mt-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
-                        <h4 class="text-2xl font-black dark:text-white capitalize tracking-tighter">${escapeHtml(w.word)}</h4>
-                        <div class="mt-4 h-1 bg-stone-50 dark:bg-zinc-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-gold-500" style="width: ${w.mastered ? '100%' : '20%'}"></div>
+                        <h4 class="text-2xl font-extrabold capitalize tracking-tight mb-2 relative z-10">${escapeHtml(w.word)}</h4>
+                        <p class="text-sm text-surface-500 truncate relative z-10 font-medium">${w.deepData && w.deepData[0] ? escapeHtml(w.deepData[0].def) : '...'}</p>
+                        
+                        <div class="mt-6 h-1.5 w-full bg-surface-200 dark:bg-surface-800 rounded-full overflow-hidden relative z-10">
+                            <div class="h-full ${w.mastered ? 'bg-vault-500 shadow-[0_0_8px_rgba(184,150,36,0.8)]' : 'bg-surface-400 dark:bg-surface-600'} transition-all duration-500" style="width: ${w.mastered ? '100%' : '15%'}"></div>
                         </div>
                     </div>
                 `).join('');
@@ -581,7 +804,7 @@
             updateDashboard();
         };
 
-        // --- NAVIGATION & FLASHCARDS ---
+        // Navigation & Flashcards
         window.openPreview = (key) => {
             currentPreviewIndex = cloudDb.findIndex(w => w.fbKey === key);
             renderFlashcard(cloudDb[currentPreviewIndex]);
@@ -590,7 +813,17 @@
 
         window.navigatePreview = (dir) => {
             const next = currentPreviewIndex + dir;
-            if (next >= 0 && next < cloudDb.length) { currentPreviewIndex = next; renderFlashcard(cloudDb[currentPreviewIndex]); }
+            if (next >= 0 && next < cloudDb.length) { 
+                currentPreviewIndex = next; 
+                const container = document.querySelector('#word-preview-modal .modal-content');
+                container.style.opacity = '0.7';
+                container.style.transform = `scale(0.98) translateX(${dir * 20}px)`;
+                setTimeout(() => {
+                    renderFlashcard(cloudDb[currentPreviewIndex]);
+                    container.style.opacity = '1';
+                    container.style.transform = 'scale(1) translateX(0)';
+                }, 150);
+            }
         };
 
         window.playCurrentPreviewAudio = () => {
@@ -601,18 +834,33 @@
         function renderFlashcard(data) {
             document.getElementById('pv-word').innerText = data.word;
             document.getElementById('pv-ipa').innerText = data.phonetic ? `/${data.phonetic}/` : '';
+            
             const audioBtn = document.getElementById('pv-audio-btn');
             audioBtn.classList.toggle('hidden', !data.audio);
+            
             const mBtn = document.getElementById('mastery-toggle-btn');
-            mBtn.innerText = data.mastered ? "Unmark" : "Master";
-            mBtn.className = data.mastered ? 'text-[9px] font-black uppercase px-6 py-2 rounded-full bg-zinc-950 text-white' : 'text-[9px] font-black uppercase px-6 py-2 rounded-full bg-gold-500 text-white shadow-lg';
+            if(data.mastered) {
+                mBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Mastered`;
+                mBtn.className = 'text-[11px] font-bold uppercase tracking-wide px-5 py-2.5 rounded-xl bg-surface-800 text-white shadow-lg active:scale-95 transition-all flex items-center gap-2';
+            } else {
+                mBtn.innerHTML = `Verify`;
+                mBtn.className = 'text-[11px] font-bold uppercase tracking-wide px-6 py-2.5 rounded-xl bg-vault-500 text-white shadow-lg shadow-vault-500/20 active:scale-95 transition-all flex items-center gap-2';
+            }
+
             document.getElementById('pv-meanings-container').innerHTML = (data.deepData || []).map(d => `
-                <div class="bg-white dark:bg-zinc-800 p-6 rounded-3xl border border-stone-100 dark:border-zinc-700 shadow-sm">
-                    <span class="text-[9px] font-black uppercase text-gold-500 tracking-widest">${escapeHtml(d.pos)}</span>
-                    <p class="text-xl font-black dark:text-white mt-2 leading-tight">${escapeHtml(d.def)}</p>
-                    ${d.example ? `<p class="text-xs italic opacity-50 mt-2 font-bold">"${escapeHtml(d.example)}"</p>` : ''}
+                <div class="bg-surface-50 dark:bg-surface-800/50 p-6 rounded-2xl border border-surface-200 dark:border-surface-700 shadow-sm">
+                    <span class="text-[9px] font-bold uppercase text-vault-600 dark:text-vault-400 tracking-wider bg-vault-100 dark:bg-vault-900/30 px-2.5 py-1 rounded-md inline-block mb-3">${escapeHtml(d.pos)}</span>
+                    <p class="text-lg font-semibold leading-relaxed">${escapeHtml(d.def)}</p>
+                    ${d.example ? `<p class="text-sm italic text-surface-500 mt-3 font-serif border-l-2 border-surface-300 dark:border-surface-600 pl-3">"${escapeHtml(d.example)}"</p>` : ''}
                 </div>
-            `).join('') + (data.synonyms && data.synonyms.length ? `<div class="flex flex-wrap gap-2 pt-2">${data.synonyms.map(s => `<span class="text-[9px] font-black uppercase bg-gold-50 dark:bg-zinc-800 text-gold-600 dark:text-gold-400 px-3 py-1 rounded-full">${escapeHtml(s)}</span>`).join('')}</div>` : '');
+            `).join('') + (data.synonyms && data.synonyms.length ? `
+                <div class="mt-6 flex flex-col gap-2">
+                    <span class="text-[10px] font-bold uppercase text-surface-400 tracking-wider ml-1">Synonyms</span>
+                    <div class="flex flex-wrap gap-2">
+                        ${data.synonyms.map(s => `<span class="text-xs font-semibold bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700">${escapeHtml(s)}</span>`).join('')}
+                    </div>
+                </div>` : '');
+            
             if (window.navigator.vibrate) window.navigator.vibrate(20);
         }
 
@@ -621,16 +869,19 @@
             const newState = !word.mastered;
             try {
                 await update(ref(rtdb, `users/${activeUser.uid}/words/${word.fbKey}`), { mastered: newState });
-                if (newState) confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#f59e0b', '#fbbf24'] });
+                if (newState) {
+                    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: ['#b89624', '#cbb02e', '#e5de93'] });
+                    showToast("Word Mastered! 🎉");
+                }
                 setTimeout(() => renderFlashcard(cloudDb[currentPreviewIndex]), 100);
-            } catch(e) { showToast("Couldn't update mastery"); }
+            } catch(e) { showToast("Couldn't update status"); }
         };
 
-        // --- PRACTICE / QUIZ MODE ---
+        // Practice Mode
         window.startQuiz = () => {
             const pool = cloudDb.filter(w => !w.mastered);
             quizQueue = (pool.length ? pool : cloudDb).slice().sort(() => Math.random() - 0.5);
-            if (!quizQueue.length) { showToast("Add some words to your archive first"); return; }
+            if (!quizQueue.length) { showToast("Archive some words first to start training"); return; }
             quizIndex = 0; quizScore = 0;
             document.getElementById('quiz-modal').classList.add('active');
             renderQuizCard();
@@ -662,25 +913,34 @@
             }
             if (quizIndex + 1 < quizQueue.length) {
                 quizIndex++;
-                renderQuizCard();
+                const content = document.querySelector('#quiz-modal .modal-content');
+                content.style.transform = 'scale(0.95)';
+                content.style.opacity = '0.5';
+                setTimeout(() => {
+                    renderQuizCard();
+                    content.style.transform = 'scale(1)';
+                    content.style.opacity = '1';
+                }, 200);
             } else {
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#f59e0b', '#fbbf24'] });
-                showToast(`Round complete — ${quizScore}/${quizQueue.length} correct`);
-                window.closeQuiz();
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: ['#b89624', '#cbb02e', '#10b981'] });
+                showToast(`Session Complete: ${quizScore}/${quizQueue.length} Correct`);
+                setTimeout(() => window.closeQuiz(), 1500);
             }
         };
 
         window.closeQuiz = () => document.getElementById('quiz-modal').classList.remove('active');
 
-        // --- ANALYTICS ---
+        // Analytics
         window.openHub = () => {
             document.getElementById('hub-modal').classList.add('active');
-            renderCharts();
+            setTimeout(renderCharts, 300); // Wait for modal animation to size canvas correctly
         };
 
         function renderCharts() {
             const ctx = document.getElementById('masteryChart');
+            if(!ctx) return;
             if (masteryChart) masteryChart.destroy();
+            
             const days = [...Array(7)].map((_, i) => {
                 const d = new Date(); d.setDate(d.getDate() - i);
                 return d;
@@ -688,22 +948,47 @@
             const labels = days.map(d => d.toLocaleDateString(undefined, { weekday: 'short' }));
             const data = days.map(d => cloudDb.filter(w => new Date(w.date).toDateString() === d.toDateString()).length);
 
+            // Responsive chart colors based on theme
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            const textColor = isDark ? '#a1a1aa' : '#71717a'; // zinc-400/zinc-500
+
             masteryChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{ label: 'Learned', data: data, borderColor: '#f59e0b', tension: 0.4, fill: true, backgroundColor: 'rgba(245, 158, 11, 0.05)', pointRadius: 0 }]
+                    datasets: [{ 
+                        label: 'Words Added', 
+                        data: data, 
+                        borderColor: '#b89624', 
+                        tension: 0.4, 
+                        fill: true, 
+                        backgroundColor: isDark ? 'rgba(184, 150, 36, 0.15)' : 'rgba(184, 150, 36, 0.1)', 
+                        pointRadius: 4,
+                        pointBackgroundColor: '#b89624',
+                        pointBorderColor: isDark ? '#18181b' : '#ffffff',
+                        pointBorderWidth: 2
+                    }]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { padding: 12, cornerRadius: 8, titleFont: {family: '"Plus Jakarta Sans"', size: 13}, bodyFont: {family: '"Plus Jakarta Sans"', size: 14, weight: 'bold'} } }, 
+                    scales: { 
+                        y: { beginAtZero: true, border: {display: false}, grid: { color: gridColor }, ticks: { precision: 0, color: textColor, font: {family: '"Plus Jakarta Sans"', size: 11} } }, 
+                        x: { border: {display: false}, grid: { display: false }, ticks: { color: textColor, font: {family: '"Plus Jakarta Sans"', size: 11} } } 
+                    } 
+                }
             });
+
             document.getElementById('rep-total').innerText = cloudDb.length;
             const mastered = cloudDb.filter(w => w.mastered).length;
             document.getElementById('rep-mastered').innerText = mastered;
             document.getElementById('profile-rate').innerText = cloudDb.length ? Math.round((mastered / cloudDb.length) * 100) + '%' : '0%';
-            document.getElementById('profile-streak').innerText = computeStreak(cloudDb);
+            document.getElementById('profile-streak').innerHTML = `${computeStreak(cloudDb)}<span class="text-sm ml-1">🔥</span>`;
         }
 
-        // --- DASHBOARD ---
+        // Dashboard
         function computeStreak(words) {
             if (!words.length) return 0;
             const days = new Set(words.map(w => new Date(w.date).toDateString()));
@@ -718,10 +1003,13 @@
         }
 
         function updateDashboard() {
-            const count = cloudDb.filter(w => w.date >= new Date().setHours(0, 0, 0, 0)).length;
+            // Fix bug in original logic to properly calculate today's count
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const count = cloudDb.filter(w => w.date >= startOfToday.getTime()).length;
+            
             document.getElementById('daily-count-text').innerText = count;
             document.getElementById('goal-progress-bar').style.width = `${Math.min((count / 5) * 100, 100)}%`;
-            document.getElementById('profile-streak').innerText = computeStreak(cloudDb);
         }
 
         function showToast(msg) {
@@ -729,14 +1017,19 @@
             document.getElementById('toast-msg').innerText = msg;
             t.classList.add('active');
             clearTimeout(showToast._timer);
-            showToast._timer = setTimeout(() => t.classList.remove('active'), 3000);
+            showToast._timer = setTimeout(() => t.classList.remove('active'), 3500);
         }
 
         window.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement.tagName;
             const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
 
-            if (e.key === '/' && !isTyping) { e.preventDefault(); document.getElementById('word-input').focus(); }
+            if (e.key === '/' && !isTyping) { 
+                e.preventDefault(); 
+                const input = document.getElementById('word-input');
+                input.focus(); 
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             if (e.key === 'Enter' && document.activeElement.id === 'word-input') { searchWord(); }
 
             if (document.getElementById('word-preview-modal').classList.contains('active')) {
@@ -747,16 +1040,21 @@
             if (e.key === 'Escape') { closePreview(); closeHub(); window.closeQuiz(); }
         });
 
-        window.closeHub = () => document.getElementById('hub-modal').classList.remove('active');
+        window.closeHub = () => {
+            document.getElementById('hub-modal').classList.remove('active');
+            if(masteryChart) { setTimeout(() => masteryChart.destroy(), 400); masteryChart = null; }
+        };
         window.closePreview = () => document.getElementById('word-preview-modal').classList.remove('active');
-        window.openProfile = () => window.openHub();
         window.deleteWord = async (key) => {
             if (!confirm("Erase this entry from your vault?")) return;
             try { await remove(ref(rtdb, `users/${activeUser.uid}/words/${key}`)); }
             catch(e) { showToast("Couldn't delete entry"); }
         };
-        window.toggleDarkMode = () => { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; };
-        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        window.toggleDarkMode = () => { 
+            const isDark = document.documentElement.classList.toggle('dark'); 
+            localStorage.theme = isDark ? 'dark' : 'light'; 
+        };
 
         function toggleLoader(s) {
             document.getElementById('search-loader').style.display = s ? 'block' : 'none';
@@ -775,8 +1073,8 @@
                 Definitions: (w.deepData || []).map(d => `${d.pos}: ${d.def}`).join(' | ')
             })));
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Vault");
-            XLSX.writeFile(wb, "WordVault_Export.xlsx");
-            showToast("Export ready");
+            XLSX.writeFile(wb, "WordVault_Master_Archive.xlsx");
+            showToast("Archive Exported Successfully");
         };
     </script>
 </body>
